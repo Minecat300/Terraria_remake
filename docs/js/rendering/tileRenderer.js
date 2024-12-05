@@ -23,7 +23,7 @@ self.onmessage = function (e) {
         return;
     }
 
-    const { viewportTiles, viewportTilesOffset, tileSize } = e.data;
+    const { viewportTiles, viewportTilesOffset, tileSize, cam } = e.data;
     const tiles = new Uint16Array(viewportTiles.data);
     const tilesOffset = new Uint16Array(viewportTilesOffset)
     const viewportWidth = viewportTiles.width;
@@ -39,7 +39,7 @@ self.onmessage = function (e) {
 
     for (let y = 0; y < viewportHeight; y++) {
         for (let x = 0; x < viewportWidth; x++) {
-            const tileIDX = x + viewportWidth * y;
+            const tileIDX = x + viewportWidth * (viewportHeight - y - 1);
             const tileID = tiles[tileIDX];
             if (tileID === 0) continue;
             const tileOffsetID = tilesOffset[tileIDX];
@@ -58,6 +58,6 @@ self.onmessage = function (e) {
         }
     }
     self.canvas.convertToBlob().then((blob) => {
-        self.postMessage({ frame: blob });
+        self.postMessage({ frame: blob, cam: cam });
     });
 }

@@ -90,28 +90,22 @@ async function startGame() {
         offsetGrid[i] = packSignedXY(randomNumber(0, 5), randomNumber(0, 4))
     }
 
-    updateViewspace(tileGrid, tileGridWidth, tileGridHeight, offsetGrid, tilesheetSize);
+    updateViewspace();
 
     gameLoop();
 }
 
-function tmpUpdate() {
+function updateViewspace() {
     const tileGridWidth = 64;
     const tileGridHeight = 36;
-    const tileGridSize = tileGridWidth*tileGridHeight;
 
-    let tileGrid = new Uint16Array(tileGridSize);
-    let offsetGrid = new Uint16Array(tileGridSize);
+    let viewGrid = extractViewspace(tileGrid);
+    let viewOffsetGrid = extractViewspace(offsetTileGrid);
 
-    for (i = 0; i < tileGridSize; i++) {
-        tileGrid[i] = randomNumber(1, 3)
-        offsetGrid[i] = packSignedXY(randomNumber(0, 5), randomNumber(0, 4))
-    }
-
-    updateViewspace(tileGrid, tileGridWidth, tileGridHeight, offsetGrid, tilesheetSize);
+    createTileMap(viewGrid, tileGridWidth, tileGridHeight, viewOffsetGrid, tilesheetSize);
 }
 
-const tileWorker = new Worker("js/tileRenderer.js");
+const tileWorker = new Worker("js/rendering/tileRenderer.js");
 
 let tilesImg;
 const tilesheetSize = 16;
@@ -122,6 +116,7 @@ stitchImages("./images/tileSheets", "png", "Tiles_", 0, 2).then((img) => {
 }).catch(console.error);
 
 let tileBitmap = new Image();
+let tileCam;
 
 function renderMain() {
     updateAsp(lockAsp);
@@ -131,7 +126,7 @@ function renderMain() {
     drawAsp();
 }
 
-function updateViewspace(viewportTilesData, viewportTilesWidth, viewportTilesHeight, viewportTilesOffset, tileSize) {
+function createTileMap(viewportTilesData, viewportTilesWidth, viewportTilesHeight, viewportTilesOffset, tileSize, camX, camY, camZoom) {
 
     const viewportTiles = {
         data: viewportTilesData,
@@ -139,16 +134,35 @@ function updateViewspace(viewportTilesData, viewportTilesWidth, viewportTilesHei
         height: viewportTilesHeight
     }
 
+    const camera = {
+        x: camX,
+        y: camY,
+        zoom: camZoom
+    }
+
     tileWorker.postMessage({
         viewportTiles: viewportTiles,
         viewportTilesOffset: viewportTilesOffset,
-        tileSize: tileSize
+        tileSize: tileSize,
+        cam: camera
     });
 }
 
 tileWorker.onmessage = (e) => {
-    const frame = e.data.frame
+    const frame = e.data.frame;
+    tileCam = e.data.cam;
     createImageBitmap(frame).then((bitmap) => {
         tileBitmap = bitmap;
     })
+}
+
+function extractViewspace(grid, tileGridWidth, viewX, viewY, viewWidth, viewHeight) {
+    const viewspace = new Uint16Array(viewWidth * viewHeight);
+
+    for (let y = 0; y < viewHeight; y++) {
+        const sourceRowStart = (viewY + y) * tileGridWidth + viewX;
+        const viewRowStart = y * viewWidth;
+        viewspace.set(grid.subarray(sourceRowStart, sourceRowStart + viewWidth), viewRowStart);
+    }
+    return viewspace;
 }
