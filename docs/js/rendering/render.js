@@ -54,21 +54,6 @@ function getJson() {
         });
 }
 
-function packSignedXY(x, y) {
-    if (x < -128 || x > 127 || y < -128 || y > 127) {
-      throw new Error("x and y must be in the range -128 to 127.");
-    }
-  
-    const xOffset = x + 128;
-    const yOffset = y + 128; 
-  
-    return (yOffset << 8) | xOffset;
-}
-
-function randomNumber(min, max) {
-    return Math.round(Math.random()*(max-min))+min
-}
-
 async function startGame() {
     console.log(tileData)
 
@@ -102,7 +87,7 @@ function updateViewspace() {
     let viewGrid = extractViewspace(tileGrid);
     let viewOffsetGrid = extractViewspace(offsetTileGrid);
 
-    createTileMap(viewGrid, tileGridWidth, tileGridHeight, viewOffsetGrid, tilesheetSize);
+    createTileMap(viewGrid, tileGridWidth, tileGridHeight, viewOffsetGrid, tilesheetSize, cam.x, cam.y, cam.zoom);
 }
 
 const tileWorker = new Worker("js/rendering/tileRenderer.js");
@@ -135,8 +120,8 @@ function createTileMap(viewportTilesData, viewportTilesWidth, viewportTilesHeigh
     }
 
     const camera = {
-        x: camX,
-        y: camY,
+        x: Math.floor(camX / tileSize),
+        y: Math.floor(camY / tileSize),
         zoom: camZoom
     }
 

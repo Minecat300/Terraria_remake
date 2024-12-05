@@ -1,0 +1,3 @@
+function updateMain() {
+    updatePlayerMain();
+}

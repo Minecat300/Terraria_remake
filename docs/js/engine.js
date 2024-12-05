@@ -31,7 +31,7 @@ function mouseMove(event) {
 
 function mousePress() {mouseDown = true;}
 function mouseRelease() {mouseDown = false;}
-function mouseReset() {mouseX = 0; mouseY = 0; mouseDown = false;}
+function mouseReset() {mouseX = 0; mouseY = 0; mouseDown = false; for (const key in keyPress) {keyPress[key] = false;}}
 
 var elem = document.documentElement;
 
@@ -55,7 +55,17 @@ function closeFullscreen() {
     }
 }
 
-const keyPress = {}
+const keyPress = {
+    space: false,
+    w: false,
+    a: false,
+    s: false,
+    d: false,
+    upArrow: false,
+    downArrow: false,
+    leftArrow: false,
+    rightArrow: false
+}
 
 function updateKeyboard(event, state) {
     switch (event.key) {
@@ -63,6 +73,31 @@ function updateKeyboard(event, state) {
             if (state == true) {
                 updateViewspace();
             }
+            keyPress.space = state;
+            break;
+        case "w":
+            keyPress.w = state;
+            break;
+        case "a":
+            keyPress.a = state;
+            break;
+        case "s":
+            keyPress.s = state;
+            break;
+        case "d":
+            keyPress.d = state;
+            break;
+        case "ArrowUp":
+            keyPress.upArrow = state;
+            break;
+        case "ArrowDown":
+            keyPress.downArrow = state;
+            break;
+        case "ArrowLeft":
+            keyPress.leftArrow = state;
+            break;
+        case "ArrowRight":
+            keyPress.rightArrow = state;
             break;
     }
 }
@@ -204,4 +239,33 @@ function download(data, filename, type) {
             window.URL.revokeObjectURL(url);  
         }, 0); 
     }
+}
+
+function packSignedXY(x, y) {
+    if (x < -128 || x > 127 || y < -128 || y > 127) {
+      throw new Error("x and y must be in the range -128 to 127.");
+    }
+  
+    const xOffset = x + 128;
+    const yOffset = y + 128; 
+  
+    return (yOffset << 8) | xOffset;
+}
+
+function unpackSignedXY(value) {
+    if (value < 0 || value > 65535) {
+      throw new Error("Value must be in the range 0-65535.");
+    }
+  
+    const xOffset = value & 0xFF;        
+    const yOffset = (value >> 8) & 0xFF;
+  
+    const x = xOffset - 128; 
+    const y = yOffset - 128;
+  
+    return [x, y];
+}
+
+function randomNumber(min, max) {
+    return Math.round(Math.random()*(max-min))+min
 }

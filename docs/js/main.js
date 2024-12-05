@@ -23,6 +23,7 @@ const gameLoop = async () => {
         previousTime = currentTime;
 
         if (deltaUpdates >= 1) {
+            updateMain();
             deltaUpdates--;
             updates++;
         }
