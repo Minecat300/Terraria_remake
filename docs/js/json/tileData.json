@@ -1,0 +1,29 @@
+[
+    {
+        "name": "Air",
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 0, "y": 0},
+        "tileAssetSize": {"width": 16, "height": 16}
+    },
+
+    {
+        "name": "Dirt",
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 15, "y": 14},
+        "tileAssetSize": {"width": 16, "height": 16}
+    },
+
+    {
+        "name": "Stone",
+        "startIDX": {"x": 0, "y": 15},
+        "endIDX": {"x": 15, "y": 29},
+        "tileAssetSize": {"width": 16, "height": 16}
+    },
+
+    {
+        "name": "Grass",
+        "startIDX": {"x": 0, "y": 30},
+        "endIDX": {"x": 15, "y": 52},
+        "tileAssetSize": {"width": 16, "height": 16}
+    }
+]
