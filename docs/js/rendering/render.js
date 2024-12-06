@@ -63,37 +63,29 @@ async function startGame() {
 
     await sleep(10)
 
-    const tileGridWidth = 64;
-    const tileGridHeight = 36;
-    const tileGridSize = tileGridWidth*tileGridHeight;
-
-    let tileGrid = new Uint16Array(tileGridSize);
-    let offsetGrid = new Uint16Array(tileGridSize);
-
-    for (i = 0; i < tileGridSize; i++) {
-        tileGrid[i] = randomNumber(1, 3)
-        offsetGrid[i] = packSignedXY(randomNumber(0, 5), randomNumber(0, 4))
-    }
-
     updateViewspace();
 
     gameLoop();
 }
 
 function updateViewspace() {
-    const tileGridWidth = 64;
-    const tileGridHeight = 36;
+    const viewspaceGridWidth = Math.ceil(viewspaceWidth/(16*cam.zoom))+viewspacePadding;
+    const viewspaceGridHeight = Math.ceil(viewspaceHeight/(16*cam.zoom))+viewspacePadding;
 
-    let viewGrid = extractViewspace(tileGrid);
-    let viewOffsetGrid = extractViewspace(offsetTileGrid);
+    const viewspaceGridX = Math.floor(cam.x/16) - Math.ceil(viewspaceGridWidth/2)
+    const viewspaceGridY = Math.floor(cam.y/16) - Math.ceil(viewspaceGridHeight/2)
 
-    createTileMap(viewGrid, tileGridWidth, tileGridHeight, viewOffsetGrid, tilesheetSize, cam.x, cam.y, cam.zoom);
+    let viewGrid = extractViewspace(tileGrid, viewspaceGridX, viewspaceGridY, viewspaceGridWidth, viewspaceGridHeight);
+    let viewOffsetGrid = extractViewspace(offsetTileGrid, viewspaceGridX, viewspaceGridY, viewspaceGridWidth, viewspaceGridHeight);
+
+    createTileMap(viewGrid, viewspaceGridWidth, viewspaceGridHeight, viewOffsetGrid, tilesheetSize, cam.x, cam.y, cam.zoom);
 }
 
 const tileWorker = new Worker("js/rendering/tileRenderer.js");
 
 let tilesImg;
 const tilesheetSize = 16;
+const viewspacePadding = 10;
 
 stitchImages("./images/tileSheets", "png", "Tiles_", 0, 2).then((img) => {
     tilesImg = img
@@ -107,7 +99,7 @@ function renderMain() {
     updateAsp(lockAsp);
     ctx.clearRect(0, 0, c.width, c.height);
     ctx.imageSmoothingEnabled = false;
-    drawAdvImage(ctx, tileBitmap, new moveMatrix(viewspaceWidth/2, viewspaceHeight/2, viewspaceWidth, undefined))
+    drawTileFrame();
     drawAsp();
 }
 
@@ -120,8 +112,8 @@ function createTileMap(viewportTilesData, viewportTilesWidth, viewportTilesHeigh
     }
 
     const camera = {
-        x: Math.floor(camX / tileSize),
-        y: Math.floor(camY / tileSize),
+        x: Math.floor(camX / tileSize)*tileSize,
+        y: Math.floor(camY / tileSize)*tileSize,
         zoom: camZoom
     }
 
@@ -141,13 +133,31 @@ tileWorker.onmessage = (e) => {
     })
 }
 
-function extractViewspace(grid, tileGridWidth, viewX, viewY, viewWidth, viewHeight) {
+function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight) {
     const viewspace = new Uint16Array(viewWidth * viewHeight);
 
     for (let y = 0; y < viewHeight; y++) {
-        const sourceRowStart = (viewY + y) * tileGridWidth + viewX;
-        const viewRowStart = y * viewWidth;
-        viewspace.set(grid.subarray(sourceRowStart, sourceRowStart + viewWidth), viewRowStart);
+        const sourceRowStart = getIDX(Math.max(viewX, 0), viewY + y);
+        const viewRowStart = y * viewWidth + Math.max(viewX, 0) - viewX;
+        viewspace.set(grid.subarray(sourceRowStart, sourceRowStart + viewWidth - (Math.max(viewX, 0) - viewX)), viewRowStart);
     }
     return viewspace;
+    
+}
+
+function drawTileFrame() {
+
+    const viewspaceGridWidth = (Math.ceil(viewspaceWidth/(16*tileCam.zoom))+viewspacePadding)*(16*tileCam.zoom);
+    console.log(viewspaceGridWidth)
+    
+    drawAdvImage(ctx, tileBitmap, new moveMatrix(viewspaceWidth/2 + (tileCam.x - cam.x)*tileCam.zoom, viewspaceHeight/2 + (cam.y - tileCam.y)*tileCam.zoom, viewspaceGridWidth, undefined));
+
+    const tcamX = Math.floor(cam.x/16)*16;
+    const tcamY = Math.floor(cam.y/16)*16;
+
+    if ((Math.floor(tcamX/2) != Math.floor(tileCam.x/2)) || (Math.floor(tcamY/2) != Math.floor(tileCam.y/2))) {
+        updateViewspace()
+    }
+
+
 }

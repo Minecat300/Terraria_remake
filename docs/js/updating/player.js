@@ -1,7 +1,7 @@
 const cam = {
     x: 0,
     y: 0,
-    zoom: 1
+    zoom: 2
 }
 
 const player = {
@@ -13,8 +13,8 @@ const player = {
 function updatePlayerMain() {
     getInputAxis();
 
-    player.speed.x += 10 * player.axis.x;
-    player.speed.y += 10 * player.axis.y;
+    player.speed.x += 7 * player.axis.x;
+    player.speed.y += 7 * player.axis.y;
 
     player.speed.x *= 0.7;
     player.speed.y *= 0.7;
@@ -29,7 +29,7 @@ function updatePlayerMain() {
 function getInputAxis() {
     const left = keyPress.a || keyPress.leftArrow;
     const right = keyPress.d || keyPress.rightArrow;
-    const up = keyPress.w || keyPress.upArrow || keyPress.space;
+    const up = keyPress.w || keyPress.upArrow// || keyPress.space;
     const down = keyPress.s || keyPress.downArrow;
 
     player.axis.x = right - left;
