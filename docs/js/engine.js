@@ -70,9 +70,6 @@ const keyPress = {
 function updateKeyboard(event, state) {
     switch (event.key) {
         case " ":
-            if (state == true) {
-                updateViewspace();
-            }
             keyPress.space = state;
             break;
         case "w":
@@ -98,6 +95,11 @@ function updateKeyboard(event, state) {
             break;
         case "ArrowRight":
             keyPress.rightArrow = state;
+            break;
+        case "b":
+            if (state) {
+                window.open('https://www.twitch.tv/beepstr');
+            }
             break;
     }
 }
@@ -268,4 +270,22 @@ function unpackSignedXY(value) {
 
 function randomNumber(min, max) {
     return Math.round(Math.random()*(max-min))+min
+}
+
+async function loadJSON(path) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${path}: ${response.status}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error loading JSON:', error);
+      throw error;
+    }
+}
+
+function getIDX(x, y) {
+    return x + worldWidth * y;
 }

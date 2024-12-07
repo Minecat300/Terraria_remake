@@ -4,7 +4,8 @@
         "startIDX": {"x": 0, "y": 0},
         "endIDX": {"x": 0, "y": 0},
         "tileAssetSize": {"width": 16, "height": 16},
-        "tileSolver": "none"
+        "tileSolver": "none",
+        "collisionState": "passThrough"
     },
 
     {
@@ -12,7 +13,8 @@
         "startIDX": {"x": 0, "y": 0},
         "endIDX": {"x": 15, "y": 14},
         "tileAssetSize": {"width": 16, "height": 16},
-        "tileSolver": "default"
+        "tileSolver": "default",
+        "collisionState": "solid"
     },
 
     {
@@ -20,14 +22,34 @@
         "startIDX": {"x": 0, "y": 15},
         "endIDX": {"x": 15, "y": 29},
         "tileAssetSize": {"width": 16, "height": 16},
-        "tileSolver": "default"
+        "tileSolver": "default",
+        "collisionState": "solid"
     },
 
     {
         "name": "Grass",
         "startIDX": {"x": 0, "y": 30},
-        "endIDX": {"x": 15, "y": 52},
+        "endIDX": {"x": 15, "y": 51},
         "tileAssetSize": {"width": 16, "height": 16},
-        "tileSolver": "default"
+        "tileSolver": "default",
+        "collisionState": "solid"
+    },
+
+    {
+        "name": "Iron Ore",
+        "startIDX": {"x": 0, "y": 52},
+        "endIDX": {"x": 15, "y": 66},
+        "tileAssetSize": {"width": 16, "height": 16},
+        "tileSolver": "default",
+        "collisionState": "solid"
+    },
+
+    {
+        "name": "Copper Ore",
+        "startIDX": {"x": 0, "y": 67},
+        "endIDX": {"x": 15, "y": 81},
+        "tileAssetSize": {"width": 16, "height": 16},
+        "tileSolver": "default",
+        "collisionState": "solid"
     }
 ]
