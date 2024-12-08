@@ -23,7 +23,7 @@ self.onmessage = function (e) {
         return;
     }
 
-    const { viewportTiles, viewportTilesOffset, tileSize, cam } = e.data;
+    const { viewportTiles, viewportTilesOffset, tileSize, data } = e.data;
     const tiles = new Uint16Array(viewportTiles.data);
     const tilesOffset = new Uint16Array(viewportTilesOffset)
     const viewportWidth = viewportTiles.width;
@@ -58,6 +58,6 @@ self.onmessage = function (e) {
         }
     }
     self.canvas.convertToBlob().then((blob) => {
-        self.postMessage({ frame: blob, cam: cam });
+        self.postMessage({ frame: blob, data: data });
     });
 }

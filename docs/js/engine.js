@@ -289,3 +289,7 @@ async function loadJSON(path) {
 function getIDX(x, y) {
     return x + worldWidth * y;
 }
+
+function gridAlign(value) {
+    return Math.floor(value/tilesheetSize)*tilesheetSize
+}
