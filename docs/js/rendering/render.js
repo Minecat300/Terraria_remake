@@ -131,9 +131,10 @@ function drawTileFrame() {
         }
     }
 
-    if (Math.floor(cam.x/tilesheetSize/chunkSize.width) != prevCam.x || Math.floor(cam.y/tilesheetSize/chunkSize.height) != prevCam.y) {
+    if (Math.floor(cam.x/tilesheetSize/chunkSize.width) != prevCam.x || Math.floor(cam.y/tilesheetSize/chunkSize.height) != prevCam.y || cam.zoom != prevCam.zoom) {
         prevCam.x = Math.floor(cam.x/tilesheetSize/chunkSize.width);
         prevCam.y = Math.floor(cam.y/tilesheetSize/chunkSize.height);
+        prevCam.zoom = cam.zoom;
         updateViewspace(wallWorker, wallGrid, offsetWallGrid, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
         updateViewspace(tileWorker, tileGrid, offsetTileGrid, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
     }
@@ -173,7 +174,8 @@ let tileBitmap = {};
 let wallBitmap = {};
 let prevCam = {
     x: 0,
-    y: 0
+    y: 0,
+    zoom: 0
 };
 
 async function startGame() {
