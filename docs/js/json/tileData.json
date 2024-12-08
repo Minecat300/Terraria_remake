@@ -1,55 +1,78 @@
 [
     {
+        "id": 0,
         "name": "Air",
         "startIDX": {"x": 0, "y": 0},
         "endIDX": {"x": 0, "y": 0},
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "none",
-        "collisionState": "passThrough"
+        "collisionState": "passThrough",
+        "wall": false
     },
 
     {
+        "id": 1,
         "name": "Dirt",
         "startIDX": {"x": 0, "y": 0},
         "endIDX": {"x": 15, "y": 14},
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
-        "collisionState": "solid"
+        "collisionState": "solid",
+        "wall": false
     },
 
     {
+        "id": 2,
         "name": "Stone",
         "startIDX": {"x": 0, "y": 15},
         "endIDX": {"x": 15, "y": 29},
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
-        "collisionState": "solid"
+        "collisionState": "solid",
+        "wall": false
     },
 
     {
+        "id": 3,
         "name": "Grass",
         "startIDX": {"x": 0, "y": 30},
         "endIDX": {"x": 15, "y": 51},
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
-        "collisionState": "solid"
+        "collisionState": "solid",
+        "wall": false
     },
 
     {
+        "id": 4,
         "name": "Iron Ore",
         "startIDX": {"x": 0, "y": 52},
         "endIDX": {"x": 15, "y": 66},
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
-        "collisionState": "solid"
+        "collisionState": "solid",
+        "wall": false
     },
 
     {
+        "id": 5,
         "name": "Copper Ore",
         "startIDX": {"x": 0, "y": 67},
         "endIDX": {"x": 15, "y": 81},
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
-        "collisionState": "solid"
+        "collisionState": "solid",
+        "wall": false
+    },
+
+    {
+        "id": 6,
+        "name": "Dirt Wall",
+        "startIDX": {"x": 0, "y": 5},
+        "endIDX": {"x": 12, "y": 9},
+        "tileAssetSize": {"width": 32, "height": 32},
+        "tileSolver": "default",
+        "collisionState": "none",
+        "wall": true
     }
 ]

@@ -40,7 +40,7 @@ function generateWorldBase() {
             offsetTileGrid[idx] = tmp;
             offsetWallGrid[idx] = tmp;
 
-            wallGrid[idx] = 0;
+            wallGrid[idx] = 6;
             tileGrid[idx] = (y < worldGTCH) + 1;
             //tileGrid[idx] = randomNumber(1, 2);
             //tileGrid[idx] = ((y % 2) && (x % 2)) +1;
@@ -52,8 +52,11 @@ function generateSky() {
     for (let x = 0; x < worldWidth; x++) {
         const tY = worldGTCH + (Math.floor((worldHeight-worldGTCH)/2) + Math.floor((Math.sin(x*Math.PI/180) + 1.1*Math.sin(2*x*Math.PI/180))*3))
         for (let y = tY; y < worldHeight; y++) {
-            tileGrid[getIDX(x, y)] = 0;
+            placeTile(getIDX(x, y), 0, 0);
         }
+        placeTile(getIDX(x, tY-1), undefined, 0)
+        placeTile(getIDX(x+1, tY-1), undefined, 0)
+        placeTile(getIDX(x-1, tY-1), undefined, 0)
     }
 }
 
@@ -121,13 +124,34 @@ async function solveTileOffsets() {
     tmpTileSolverPreTileGroup = -1;
 
     for (let i = 0; i < worldSize; i++) {
-        solveTile(i, true, true);
+        solveTile(i, true, true, false);
+    }
+
+    tmpTileSolverArray = [];
+    tmpTileSolverPreRecipe = -1;
+    tmpTileSolverPreTileGroup = -1;
+
+    for (let i = 0; i < worldSize; i++) {
+        solveTile(i, true, true, true);
     }
 }
 
-function solveTile(idx, center, all) {
-    const tileGroup = tileGrid[idx];
-    const cos = offsetTileGrid[idx];
+let grid;
+let offsetGrid;
+
+function solveTile(idx, center, all, wall) {
+
+    if (wall) {
+        grid = wallGrid;
+        offsetGrid = offsetWallGrid;
+    } else {
+        grid = tileGrid;
+        offsetGrid = offsetTileGrid;
+    }
+
+
+    const tileGroup = grid[idx];
+    const cos = offsetGrid[idx];
 
     if (tileData[tileGroup].tileSolver === "none") {return;}
 
@@ -136,7 +160,7 @@ function solveTile(idx, center, all) {
     recipe += buildRecipe(idx - worldWidth, idx);
     recipe += buildRecipe(idx - 1, idx);
 
-    if (!(all && (recipe === tmpTileSolverPreRecipe && tileGrid === tmpTileSolverPreTileGroup))) {
+    if (!(all && (recipe === tmpTileSolverPreRecipe && tileGroup === tmpTileSolverPreTileGroup))) {
 
         tmpTileSolverPreRecipe = recipe;
         tmpTileSolverPreTileGroup = tileGroup;
@@ -155,13 +179,13 @@ function solveTile(idx, center, all) {
     }
     if (tmpTileSolverArray.length > 0) {
         const rand = randomNumber(0, tmpTileSolverArray.length-1)
-        offsetTileGrid[idx] = tmpTileSolverArray[rand];
+        offsetGrid[idx] = tmpTileSolverArray[rand];
     }
 }
 
 function buildRecipe(edgeIDX, mainIDX) {
-    const edgeTileID = tileGrid?.[edgeIDX] !== undefined ? tileGrid[edgeIDX] : 0;
-    const mainTileID = tileGrid?.[mainIDX] !== undefined ? tileGrid[mainIDX] : 0;
+    const edgeTileID = grid?.[edgeIDX] !== undefined ? grid[edgeIDX] : 0;
+    const mainTileID = grid?.[mainIDX] !== undefined ? grid[mainIDX] : 0;
 
     const edgeTileData = tileData[edgeTileID];
     const mainTileData = tileData[mainTileID];

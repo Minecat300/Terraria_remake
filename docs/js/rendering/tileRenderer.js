@@ -23,14 +23,20 @@ self.onmessage = function (e) {
         return;
     }
 
-    const { viewportTiles, viewportTilesOffset, tileSize, data } = e.data;
+    const { viewportTiles, viewportTilesOffset, tileSizeObj, data } = e.data;
+
+    const tileSize = tileSizeObj.tilesheetSize;
+    const tileTrueSize = tileSizeObj.tileTrueSize;
+    const tilePadding = tileSizeObj.tilePadding;
+    const tileSpaceing = tileSizeObj.tileSpaceing;
+
     const tiles = new Uint16Array(viewportTiles.data);
     const tilesOffset = new Uint16Array(viewportTilesOffset)
     const viewportWidth = viewportTiles.width;
     const viewportHeight = viewportTiles.height;
 
     if (!self.canvas) {
-        self.canvas = new OffscreenCanvas(viewportWidth * tileSize, viewportHeight * tileSize);
+        self.canvas = new OffscreenCanvas(viewportWidth * tileSize + tilePadding*2, viewportHeight * tileSize + tilePadding*2);
         self.ctx = self.canvas.getContext("2d");
         self.ctx.imageSmoothingEnabled = false;
     }
@@ -45,13 +51,13 @@ self.onmessage = function (e) {
             const tileOffsetID = tilesOffset[tileIDX];
             const [tileAssetX, tileAssetY] = unpackSignedXY(tileOffsetID);
             const tileConfig = WtileData[tileID];
-            const tileAssetSize = tileConfig?.tileAssetSize || { width: tileSize, height: tileSize };
+            const tileAssetSize = tileConfig?.tileAssetSize || { width: tileTrueSize, height: tileTrueSize };
 
             self.ctx.drawImage(
                 tilesheet,
-                (tileAssetX + tileConfig.startIDX.x) * (tileSize + 2), (tileAssetY + tileConfig.startIDX.y) * (tileSize + 2),
+                (tileAssetX + tileConfig.startIDX.x) * (tileTrueSize + tileSpaceing), (tileAssetY + tileConfig.startIDX.y) * (tileTrueSize + tileSpaceing),
                 tileAssetSize.width, tileAssetSize.height,
-                x * tileSize - tileAssetSize.width/2 + 8, y * tileSize - tileAssetSize.height/2 + 8,
+                x * tileSize - tileAssetSize.width/2 + 8 + tilePadding, y * tileSize - tileAssetSize.height/2 + 8 + tilePadding,
                 tileAssetSize.width, tileAssetSize.height
             );
 

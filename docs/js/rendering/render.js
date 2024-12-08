@@ -36,7 +36,7 @@ function loadImage(path) {
     });
 }
 
-function updateViewspace(grid, offsetGrid) {
+function updateViewspace(worker, grid, offsetGrid, tileSize) {
 
     const viewspaceGridWidth = Math.ceil(viewspaceWidth/(tilesheetSize*cam.zoom*chunkSize.width))+2;
     const viewspaceGridHeight = Math.ceil(viewspaceHeight/(tilesheetSize*cam.zoom*chunkSize.height))+2;
@@ -52,13 +52,13 @@ function updateViewspace(grid, offsetGrid) {
             chunkY = Math.floor(chunkY/chunkSize.height)*chunkSize.height;
             const key = chunkX + "," + chunkY;
             if (tileBitmap[key] === undefined) {
-                requestChuck(grid, offsetGrid, viewspaceGridX + x*chunkSize.width, viewspaceGridY + y*chunkSize.height);
+                requestChuck(worker, grid, offsetGrid, viewspaceGridX + x*chunkSize.width, viewspaceGridY + y*chunkSize.height, tileSize);
             }
         }
     }
 }
 
-function requestChuck(grid, offsetGrid, x, y) {
+function requestChuck(worker, grid, offsetGrid, x, y, tileSize) {
 
     const chunkX = Math.floor(x/chunkSize.width)*chunkSize.width;
     const chunkY = Math.floor(y/chunkSize.height)*chunkSize.height;
@@ -70,7 +70,7 @@ function requestChuck(grid, offsetGrid, x, y) {
         return;
     }
 
-    createTileMap(chunkGrid, chunkSize.width, chunkSize.height, chunkOffsetGrid, tilesheetSize, { x: chunkX, y: chunkY })
+    createTileMap(worker, chunkGrid, chunkSize.width, chunkSize.height, chunkOffsetGrid, tileSize, { x: chunkX, y: chunkY })
 }
 
 function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight) {
@@ -89,15 +89,7 @@ function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight) {
     
 }
 
-function drawTileFrame() {
-
-    const viewspaceGridWidth = Math.ceil(viewspaceWidth/(tilesheetSize*cam.zoom*chunkSize.width))+2;
-    const viewspaceGridHeight = Math.ceil(viewspaceHeight/(tilesheetSize*cam.zoom*chunkSize.height))+2;
-
-    const viewspaceGridX = Math.floor(cam.x/tilesheetSize) - Math.ceil(viewspaceGridWidth*chunkSize.width/2);
-    const viewspaceGridY = Math.floor(cam.y/tilesheetSize) - Math.ceil(viewspaceGridHeight*chunkSize.height/2);
-
-    const usedKeys = new Set();
+function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, bitmap) {
 
     for (let x = 0; x < viewspaceGridWidth; x++) {
         let chunkX = x*chunkSize.width + viewspaceGridX;
@@ -106,32 +98,48 @@ function drawTileFrame() {
             let chunkY = y*chunkSize.height + viewspaceGridY;
             chunkY = Math.floor(chunkY/chunkSize.height)*chunkSize.height;
             const key = chunkX + "," + chunkY;
-            if (tileBitmap[key] != undefined) {
-                const value = tileBitmap[key];
+            if (bitmap[key] != undefined) {
+                const value = bitmap[key];
                 if (value.image != undefined) {
                     const drawX = (chunkX*tilesheetSize - cam.x) * cam.zoom + viewspaceWidth/2 + chunkSize.width*tilesheetSize*cam.zoom;
                     const drawY = (chunkY*tilesheetSize - cam.y) * cam.zoom + viewspaceHeight/2 + chunkSize.height*tilesheetSize*cam.zoom;
-                    drawAdvImage(ctx, value.image, new moveMatrix(drawX, viewspaceHeight-drawY, chunkSize.width*tilesheetSize*cam.zoom, undefined));
+                    drawAdvImage(ctx, value.image, new moveMatrix(drawX, viewspaceHeight-drawY, value.image.width*cam.zoom, undefined));
                 }
                 usedKeys.add(key);
             }
         }
     }
+}
+
+function drawTileFrame() {
+
+    const viewspaceGridWidth = Math.ceil(viewspaceWidth/(tilesheetSize*cam.zoom*chunkSize.width))+2;
+    const viewspaceGridHeight = Math.ceil(viewspaceHeight/(tilesheetSize*cam.zoom*chunkSize.height))+2;
+
+    const viewspaceGridX = Math.floor(cam.x/tilesheetSize) - Math.ceil(viewspaceGridWidth*chunkSize.width/2);
+    const viewspaceGridY = Math.floor(cam.y/tilesheetSize) - Math.ceil(viewspaceGridHeight*chunkSize.height/2);
+
+    usedKeys = new Set();
+
+    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, wallBitmap);
+    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, tileBitmap);
 
     for (const key in tileBitmap) {
         if (!usedKeys.has(key)) {
             delete tileBitmap[key];
+            delete wallBitmap[key];
         }
     }
 
     if (Math.floor(cam.x/tilesheetSize/chunkSize.width) != prevCam.x || Math.floor(cam.y/tilesheetSize/chunkSize.height) != prevCam.y) {
         prevCam.x = Math.floor(cam.x/tilesheetSize/chunkSize.width);
         prevCam.y = Math.floor(cam.y/tilesheetSize/chunkSize.height);
-        updateViewspace(tileGrid, offsetTileGrid);
+        updateViewspace(wallWorker, wallGrid, offsetWallGrid, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
+        updateViewspace(tileWorker, tileGrid, offsetTileGrid, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
     }
 }
 
-function createTileMap(viewportTilesData, viewportTilesWidth, viewportTilesHeight, viewportTilesOffset, tileSize, data) {
+function createTileMap(worker, viewportTilesData, viewportTilesWidth, viewportTilesHeight, viewportTilesOffset, tileSize, data) {
 
     const viewportTiles = {
         data: viewportTilesData,
@@ -139,19 +147,22 @@ function createTileMap(viewportTilesData, viewportTilesWidth, viewportTilesHeigh
         height: viewportTilesHeight
     }
 
-    tileWorker.postMessage({
+    worker.postMessage({
         viewportTiles: viewportTiles,
         viewportTilesOffset: viewportTilesOffset,
-        tileSize: tileSize,
+        tileSizeObj: tileSize,
         data: data
     });
 }
 
 const tileWorker = new Worker("js/rendering/tileRenderer.js");
+const wallWorker = new Worker("js/rendering/tileRenderer.js");
 
 let tilesImg;
+let wallsImg;
 const tilesheetSize = 16;
-const viewspacePadding = 10;
+
+let usedKeys;
 
 const chunkSize = {
     width: 32,
@@ -159,6 +170,7 @@ const chunkSize = {
 }
 
 let tileBitmap = {};
+let wallBitmap = {};
 let prevCam = {
     x: 0,
     y: 0
@@ -170,15 +182,21 @@ async function startGame() {
         tilesImg = img;
     }).catch(console.error);
 
+    await stitchImages("./images/wallSheets", "png", "Wall_", 1, 2).then((img) => {
+        wallsImg = img;
+    }).catch(console.error);
+
     createImageBitmap(tilesImg).then((imageBitmap) => {
         tileWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData }, [imageBitmap]);
-    })
+    });
+
+    createImageBitmap(wallsImg).then((imageBitmap) => {
+        wallWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData }, [imageBitmap]);
+    });
 
     resetPlayer();
 
     await sleep(10);
-
-    updateViewspace(tileGrid, offsetTileGrid);
 
     gameLoop();
 }
@@ -204,5 +222,17 @@ tileWorker.onmessage = (e) => {
         tileBitmap[key].image = bitmap;
     })
     tileBitmap[key].data = data;
+}
+
+wallWorker.onmessage = (e) => {
+    const frame = e.data.frame;
+    const data = e.data.data;
+    const key = data.x + "," + data.y;
+    wallBitmap[key] = {};
+    createImageBitmap(frame).then((bitmap) => {
+        wallBitmap[key] = {};
+        wallBitmap[key].image = bitmap;
+    })
+    wallBitmap[key].data = data;
 }
 
