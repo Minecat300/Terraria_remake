@@ -24,7 +24,7 @@ showLoadingScreen();
 let tileSolverData;
 let tileData;
 
-const worldGenWorker = new Worker("js/world/worldGen.js")
+const worldGenWorker = new Worker("js/world/worldGen.js");
 
 setupWorld();
 
@@ -60,8 +60,8 @@ worldGenWorker.onmessage = (e) => {
 
 const gameLoop = async () => {
     await sleep(50);
-    let d = new Date();
-    let previousTime = d.getTime();
+    d = new Date();
+    previousTime = d.getTime();
     while (true) {    
         d = new Date();
         if (!document.hasFocus()) {previousTime = d.getTime();}

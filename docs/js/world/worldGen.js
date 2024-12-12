@@ -92,9 +92,9 @@ function makeStoneInDirt(amount, maxLength, maxHeight, maxSize) {
 }
 
 function generateCaves() {
-    placeCave(1000, 50, 6, 0);
-    placeCave(300, 300, 5, 3);
-    placeCave(100, 25, 7, 0);
+    placeCave(1000*2, 50, 6, 0);
+    placeCave(300*2, 300, 5, 3);
+    placeCave(100*2, 25, 7, 0);
 }
 
 function placeCave(amount, maxLength, maxSize, extended) {

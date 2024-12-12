@@ -101,11 +101,21 @@ function updateKeyboard(event, state) {
                 window.open('https://www.twitch.tv/beepstr');
             }
             break;
+        case "n":
+            if (state) {
+                beeps = !beeps;
+            }
+            break;
+        case "c":
+            if (state) {
+                creative = !creative;
+            }
+            break;
     }
 }
 
-window.addEventListener("keydown", function(event){updateKeyboard(event, true)}, true)
-window.addEventListener("keyup", function(event){updateKeyboard(event, false)}, true)
+window.addEventListener("keydown", function(event){updateKeyboard(event, true)}, true);
+window.addEventListener("keyup", function(event){updateKeyboard(event, false)}, true);
 
 function getAsp(img) {return img.width / img.height;}
 
@@ -113,7 +123,8 @@ function stampImage
     (
     c, img, x, y, width, height = width/getAsp(img),
     rotate = 0, cx = 0, cy = 0,
-    cropX = 0, cropY = 0, cropWidth = 1, cropHeight = 1
+    cropX = 0, cropY = 0, cropWidth = 1, cropHeight = 1,
+    overrideRotate = false
     )
 {
 
@@ -123,24 +134,36 @@ function stampImage
     cropWidth *= img.width;
     cropHeight *= img.height;
 
-    let moveX = -cropWidth/2;
-    let moveY = -cropHeight/2;
+    const moveX = -cropWidth/2;
+    const moveY = -cropHeight/2;
 
-    rotate = rotate % 360
+    rotate = rotate % 360;
     rotate *= Math.PI/180;
    
-    c.save();
-    c.translate(x, y);
-    c.translate(cx, cy);
-    c.rotate(rotate);
-    c.translate(-cx, -cy);
-    c.scale(width/img.width, height/img.height);
-    c.drawImage(
-        img,
-        cropX, cropY, cropWidth, cropHeight,
-        moveX, moveY, cropWidth, cropHeight
-    );
-    c.restore();
+    if (rotate === 0 && !overrideRotate) {
+        //c.filter = effects;
+        c.drawImage(
+            img,
+            cropX, cropY, cropWidth, cropHeight,
+            x + moveX*width/img.width, y + moveY*height/img.height, cropWidth*width/img.width, cropHeight*height/img.height
+        );
+        //c.filter = 'none';
+    } else {
+        c.save();
+        c.translate(x, y);
+        c.translate(cx, cy);
+        c.rotate(rotate);
+        c.translate(-cx, -cy);
+        c.scale(width/img.width, height/img.height);
+        //c.filter = effects;
+        c.drawImage(
+            img,
+            cropX, cropY, cropWidth, cropHeight,
+            moveX, moveY, cropWidth, cropHeight
+        );
+        //c.filter = 'none';
+        c.restore();
+    }
 }
 
 function moveMatrix(x, y, width, height) {
@@ -163,7 +186,7 @@ function cropMatrix(cropX, cropY, cropWidth, cropHeight) {
     this.cropHeight = cropHeight;
 }
 
-function drawAdvImage(c, img, MM, RM = new rotationMatrix(0, 0, 0), CM = new cropMatrix(0, 0, 1, 1)) {
+function drawAdvImage(c, img, MM, RM = new rotationMatrix(0, 0, 0), CM = new cropMatrix(0, 0, 1, 1), overrideRotate) {
     let x = MM.x;
     let y = MM.y;
     let width = MM.width;
@@ -172,18 +195,18 @@ function drawAdvImage(c, img, MM, RM = new rotationMatrix(0, 0, 0), CM = new cro
     let cx = RM.cx;
     let cy = RM.cy;
 
-    x = x/viewspaceWidth*screenWidth + screenOffsetX
-    y = y/viewspaceHeight*screenHeight + screenOffsetY
+    x = x/viewspaceWidth*screenWidth + screenOffsetX;
+    y = y/viewspaceHeight*screenHeight + screenOffsetY;
 
-    width = width/viewspaceWidth*screenWidth
+    width = width/viewspaceWidth*screenWidth;
     if (height != undefined) {
-        height = height/viewspaceHeight*screenHeight
+        height = height/viewspaceHeight*screenHeight;
     }
 
-    cx = cx/viewspaceWidth*screenWidth
-    cy = cy/viewspaceHeight*screenHeight
+    cx = cx/viewspaceWidth*screenWidth;
+    cy = cy/viewspaceHeight*screenHeight;
 
-    stampImage(c, img, x, y, width, height, RM.rotate, cx, cy, CM.cropX, CM.cropY, CM.cropWidth, CM.cropHeight);
+    stampImage(c, img, x, y, width, height, RM.rotate, cx, cy, CM.cropX, CM.cropY, CM.cropWidth, CM.cropHeight, overrideRotate);
 }
 
 function updateAsp(targetAsp, forceUpdate = false) {
@@ -201,6 +224,7 @@ function updateAsp(targetAsp, forceUpdate = false) {
         screenHeight = c.height;
         screenOffsetX = 0;
         screenOffsetY = 0;
+        return;
     }
     
     if (currentAsp > targetAsp) {
@@ -269,7 +293,7 @@ function unpackSignedXY(value) {
 }
 
 function randomNumber(min, max) {
-    return Math.round(Math.random()*(max-min))+min
+    return Math.round(Math.random()*(max-min))+min;
 }
 
 async function loadJSON(path) {
@@ -292,4 +316,8 @@ function getIDX(x, y) {
 
 function gridAlign(value) {
     return Math.floor(value/tilesheetSize)*tilesheetSize
+}
+
+function getTile(x, y) {
+    return tileGrid[getIDX(Math.floor(x/16), Math.floor(y/16))];
 }
