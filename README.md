@@ -1,5 +1,5 @@
 # Terraria remake
 
-this is a Terraria remake in pure javascript with no libraries.
+this is a Terraria remake made in pure javascript with no libraries.
 
 works best with chromium based browsers.
