@@ -25,8 +25,12 @@ let mouseY = 0;
 let mouseDown = false;
 
 function mouseMove(event) {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
+    mouseX = (event.clientX-screenOffsetX)/screenWidth*viewspaceWidth;
+    mouseY = (event.clientY-screenOffsetY)/screenHeight*viewspaceHeight;
+    mouseX = Math.max(mouseX, 0);
+    mouseY = Math.max(mouseY, 0);
+    mouseX = Math.min(mouseX, viewspaceWidth);
+    mouseY = Math.min(mouseY, viewspaceHeight);
 }
 
 function mousePress() {mouseDown = true;}
@@ -64,7 +68,8 @@ const keyPress = {
     upArrow: false,
     downArrow: false,
     leftArrow: false,
-    rightArrow: false
+    rightArrow: false,
+    c: false
 }
 
 function updateKeyboard(event, state) {
@@ -96,6 +101,9 @@ function updateKeyboard(event, state) {
         case "ArrowRight":
             keyPress.rightArrow = state;
             break;
+        case "c":
+            keyPress.c = state;
+            break; 
         case "b":
             if (state) {
                 window.open('https://www.twitch.tv/beepstr');
@@ -106,7 +114,7 @@ function updateKeyboard(event, state) {
                 beeps = !beeps;
             }
             break;
-        case "c":
+        case "o":
             if (state) {
                 creative = !creative;
             }
@@ -320,4 +328,10 @@ function gridAlign(value) {
 
 function getTile(x, y) {
     return tileGrid[getIDX(Math.floor(x/16), Math.floor(y/16))];
+}
+
+function getXY(idx) {
+    const x = idx % worldWidth;
+    const y = Math.floor(idx / worldWidth);
+    return [x, y];
 }

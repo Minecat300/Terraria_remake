@@ -10,19 +10,7 @@ let deltaUpdates = 0;
 let deltaFrames = 0;
 let deltaChecks = 0;
 
-let worldWidth;
-let worldHeight;
-let worldSize;
-let worldGTCH;
-let tileGrid;
-let wallGrid;
-let offsetTileGrid;
-let offsetWallGrid;
-
 showLoadingScreen();
-
-let tileSolverData;
-let tileData;
 
 const worldGenWorker = new Worker("js/world/worldGen.js");
 
@@ -90,6 +78,7 @@ const gameLoop = async () => {
             deltaChecks--;
         }
         await sleep(1);
+        if (!document.hasFocus()) {previousTime = new Date().getTime();}
     }
 }
 

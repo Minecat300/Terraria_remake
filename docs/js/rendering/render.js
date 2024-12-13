@@ -226,9 +226,31 @@ function drawTileFrame() {
         prevCam.x = Math.floor(cam.x/tilesheetSize/chunkSize.width*2);
         prevCam.y = Math.floor(cam.y/tilesheetSize/chunkSize.height*2);
         prevCam.zoom = cam.zoom;
-        updateViewspace(wallWorker, wallGrid, offsetWallGrid, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
-        updateViewspace(tileWorker, tileGrid, offsetTileGrid, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
+        updateFullView();
     }
+    
+    let i = 0;
+
+    for (const key in requestedChuncks) {
+        const value = requestedChuncks[key];
+        if (usedKeys.has(value)) {
+            let [x, y] = value.split(",");
+            updateChuck(x, y);
+            requestedChuncks.splice(i, 1);
+            i--
+        }
+        i++
+    }
+}
+
+function updateChuck(x, y) {
+    requestChuck(wallWorker, wallGrid, offsetWallGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
+    requestChuck(tileWorker, tileGrid, offsetTileGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
+}
+
+function updateFullView() {
+    updateViewspace(wallWorker, wallGrid, offsetWallGrid, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
+    updateViewspace(tileWorker, tileGrid, offsetTileGrid, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
 }
 
 function createTileMap(worker, viewportTilesData, viewportTilesWidth, viewportTilesHeight, viewportTilesOffset, tileSize, data) {
@@ -265,6 +287,8 @@ const chunkSize = {
     width: 32,
     height: 18,
 }
+
+let requestedChuncks = [];
 
 let tileBitmap = {};
 let wallBitmap = {};
@@ -328,23 +352,21 @@ tileWorker.onmessage = (e) => {
     tileCam = e.data.data;
     const data = e.data.data;
     const key = data.x + "," + data.y;
-    tileBitmap[key] = {};
     createImageBitmap(frame).then((bitmap) => {
         tileBitmap[key] = {};
         tileBitmap[key].image = bitmap;
-    })
-    tileBitmap[key].data = data;
+        tileBitmap[key].data = data;
+    });
 }
 
 wallWorker.onmessage = (e) => {
     const frame = e.data.frame;
     const data = e.data.data;
     const key = data.x + "," + data.y;
-    wallBitmap[key] = {};
     createImageBitmap(frame).then((bitmap) => {
         wallBitmap[key] = {};
         wallBitmap[key].image = bitmap;
-    })
-    wallBitmap[key].data = data;
+        wallBitmap[key].data = data;
+    });
 }
 

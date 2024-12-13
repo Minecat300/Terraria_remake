@@ -25,13 +25,15 @@ let solid;
 function updatePlayerMain() {
     if (creative) {
         updateCreative();
+        moveCamera();
+        creativeEditTiles();
     } else {
         handleKeys_leftRight();
         handleKeys_jump();
         movePlayerX();
         movePlayerY();
+        moveCamera();
     }
-    moveCamera();
 } 
 
 function movePlayerX() {
@@ -282,7 +284,7 @@ function drawPlayer() {
 
     drawCharacter(
         "default",
-        viewspaceWidth/2 + player.pos.x - cam.x, viewspaceHeight/2 + cam.y - player.pos.y - 3*cam.zoom, cam.zoom, player.dir,
+        viewspaceWidth/2 + (player.pos.x - cam.x)*cam.zoom, viewspaceHeight/2 + (cam.y - player.pos.y - 3)*cam.zoom, cam.zoom, player.dir,
         helmet, chestplate, greaves,
         {x: Number(player.falling > 1), y: 0}, arms, legsTime + 6, legs, legsTime, bodyTime
     );
