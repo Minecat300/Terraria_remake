@@ -73,7 +73,7 @@ const keyPress = {
 }
 
 function updateKeyboard(event, state) {
-    switch (event.key) {
+    switch (event.key.toLowerCase()) {
         case " ":
             keyPress.space = state;
             break;
@@ -89,16 +89,16 @@ function updateKeyboard(event, state) {
         case "d":
             keyPress.d = state;
             break;
-        case "ArrowUp":
+        case "arrowup":
             keyPress.upArrow = state;
             break;
-        case "ArrowDown":
+        case "arrowdown":
             keyPress.downArrow = state;
             break;
-        case "ArrowLeft":
+        case "arrowleft":
             keyPress.leftArrow = state;
             break;
-        case "ArrowRight":
+        case "arrowright":
             keyPress.rightArrow = state;
             break;
         case "c":
@@ -335,3 +335,71 @@ function getXY(idx) {
     const y = Math.floor(idx / worldWidth);
     return [x, y];
 }
+
+function loadImage(path) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = path;
+        img.onload = () => resolve(createImageBitmap(img));
+        img.onerror = reject;
+    });
+}
+
+function sin(r) {
+    return Math.sin(r*Math.PI/180);
+}
+
+function cos(r) {
+    return Math.cos(r*Math.PI/180);
+}
+
+async function playSoundAsync(audio, waitForCompletion = false) {
+    if (!(audio instanceof HTMLAudioElement)) {
+        throw new Error('Input must be an HTMLAudioElement');
+    }
+
+    try {
+        await audio.play();
+        if (waitForCompletion) {
+            await new Promise((resolve) => audio.addEventListener('ended', resolve, { once: true }));
+        }
+    } catch (error) {
+        console.error('Audio playback failed:', error);
+    }
+}
+
+function loadAudio(path) {
+    return new Promise((resolve, reject) => {
+        const audio = new Audio();
+        audio.src = path;
+        audio.onloadeddata = () => resolve(audio);
+        audio.onerror = (err) => reject(err);
+    });
+}
+
+let hasInteracted = false;
+
+document.addEventListener('click', () => {
+    hasInteracted = true;
+});
+
+document.addEventListener('keydown', () => {
+    hasInteracted = true;
+});
+
+document.addEventListener('touchstart', () => {
+    hasInteracted = true;
+});
+
+const waitUntil = (conditionFn, interval = 100) => {
+    return new Promise((resolve) => {
+        const checkCondition = () => {
+            if (conditionFn()) {
+                resolve();
+            } else {
+                setTimeout(checkCondition, interval);
+            }
+        };
+        checkCondition();
+    });
+};

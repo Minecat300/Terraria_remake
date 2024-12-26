@@ -27,15 +27,6 @@ async function stitchImages(folderPath, fileExtention, fileName, start, end) {
     return img;
 }
 
-function loadImage(path) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.src = path;
-        img.onload = () => resolve(createImageBitmap(img));
-        img.onerror = reject;
-    });
-}
-
 function grayscaleToRedscale(imageData) {
     if (!imageData || !imageData.data) {
         throw new Error('Invalid imageData provided to grayscaleToRedscale.');
@@ -339,8 +330,7 @@ async function startGame() {
 function renderMain() {
     updateAsp(lockAsp);
     ctx.clearRect(0, 0, c.width, c.height);
-    ctx.fillStyle = "#5a73f7";
-    ctx.fillRect(0, 0, c.width, c.height);
+    drawSkyBackground();
     ctx.imageSmoothingEnabled = false;
     drawTileFrame();
     drawPlayer();

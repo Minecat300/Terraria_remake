@@ -7,11 +7,29 @@ let wallGrid;
 let offsetTileGrid;
 let offsetWallGrid;
 
+let genPreviousTime = 0;
+let genCurrentTime = 0;
+
 function getIDX(x, y) {
     return x + worldWidth * y;
 }
 
+let genData = {
+    tag: "",
+    maxMain: 0,
+    currentMain: 0,
+    maxSec: 0,
+    currentSec: 0
+}
+
 async function createWorld(width, height) {
+    genData.tag = "Setting Up";
+    genData.maxMain = 7;
+    genData.currentMain = 0;
+    genData.maxSec = 0;
+    genData.currentSec = 0;
+    updateGenBar(1, true);
+
     worldWidth = width;
     worldHeight = height;
     worldSize = width * height;
@@ -29,9 +47,16 @@ async function createWorld(width, height) {
     generateSky();
     generateGrass();
     await solveTileOffsets();
+
+    genData.tag = "Done!"
+    updateGenBar(1, true);
 }
 
 function generateWorldBase() {
+    genData.tag = "Adding dirt and stone";
+    genData.maxSec = worldSize;
+    genData.currentSec = 0;
+
     const tmp = packSignedXY(1, 1);
     for (let x = 0; x < worldWidth; x++) {
         for (let y = 0; y < worldHeight; y++) {
@@ -44,11 +69,18 @@ function generateWorldBase() {
             tileGrid[idx] = (y < worldGTCH) + 1;
             //tileGrid[idx] = randomNumber(1, 2);
             //tileGrid[idx] = ((y % 2) && (x % 2)) +1;
+            genData.currentSec++;
+            updateGenBar(100);
         }
     }
+    genData.currentMain++;
 }
 
 function generateSky() {
+    genData.tag = "Generating sky";
+    genData.maxSec = worldWidth;
+    genData.currentSec = 0;
+
     for (let x = 0; x < worldWidth; x++) {
         const tY = worldGTCH + (Math.floor((worldHeight-worldGTCH)/2) + Math.floor((Math.sin(x*Math.PI/180) + 1.1*Math.sin(2*x*Math.PI/180))*3))
         for (let y = tY; y < worldHeight; y++) {
@@ -57,10 +89,17 @@ function generateSky() {
         placeTile(getIDX(x, tY-1), undefined, 0)
         placeTile(getIDX(x+1, tY-1), undefined, 0)
         placeTile(getIDX(x-1, tY-1), undefined, 0)
+        genData.currentSec++;
+        updateGenBar(10);
     }
+    genData.currentMain++;
 }
 
 function generateGrass() {
+    genData.tag = "Generating grass";
+    genData.maxSec = worldWidth;
+    genData.currentSec = 0;
+
     for (let x = 0; x < worldWidth; x++) {
         let y = worldHeight - 1;
         while (tileGrid[getIDX(x, y)] == 0 && y >= 0) {
@@ -69,32 +108,49 @@ function generateGrass() {
         if (tileGrid[getIDX(x, y)] == 1) {
             tileGrid[getIDX(x, y)] = 3;
         }
+        genData.currentSec++;
+        updateGenBar(10);
     }
+    genData.currentMain++;
 }
 
 function generateStoneAndDirtVerity() {
+    genData.tag = "Generating stone and dirt verity";
+    genData.maxSec = 400+700+450+1000;
+    genData.currentSec = 0;
+
     makeDirtInStone(400, 200);
     makeDirtInStone(700, 50);
     makeStoneInDirt(450, 100, worldGTCH + Math.floor((worldHeight - worldGTCH)/2), 10);
     makeStoneInDirt(1000, 20, worldHeight, 5);
+    genData.currentMain++;
 }
 
 function makeDirtInStone(amount, maxLength){
     for(let i = 0; i < amount; i++) {
         makeSlither(randomNumber(0, worldWidth), randomNumber(0, worldGTCH), randomNumber(2, 5), 1, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
+        genData.currentSec++;
+        updateGenBar(10);
     }
 }
 
 function makeStoneInDirt(amount, maxLength, maxHeight, maxSize) {
     for(let i = 0; i < amount; i++) {
         makeSlither(randomNumber(0, worldWidth), randomNumber(worldGTCH, randomNumber(worldGTCH, maxHeight)), randomNumber(2, maxSize), 2, undefined, 5, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
+        genData.currentSec++;
+        updateGenBar(10);
     }
 }
 
 function generateCaves() {
+    genData.tag = "Generating caves";
+    genData.maxSec = 1000*2+300*2+100*2;
+    genData.currentSec = 0;
+
     placeCave(1000*2, 50, 6, 0);
     placeCave(300*2, 300, 5, 3);
     placeCave(100*2, 25, 7, 0);
+    genData.currentMain++;
 }
 
 function placeCave(amount, maxLength, maxSize, extended) {
@@ -103,21 +159,34 @@ function placeCave(amount, maxLength, maxSize, extended) {
         for(let i2 = 0; i2 < randomNumber(0, extended); i2++) {
             makeSlither(undefined, undefined, randomNumber(2, maxSize), 0, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.1, true), randomNumber(0.1, 1, true));
         }
+        genData.currentSec++;
+        updateGenBar(10);
     }
 }
 
 function generateOres() {
+    genData.tag = "Generating ores";
+    genData.maxSec = 500+600;
+    genData.currentSec = 0;
+
     placeOre(5, 3, 500, 0, worldHeight, worldGTCH);
     placeOre(4, 3, 600, 0, worldHeight, worldGTCH);
+    genData.currentMain++;
 }
 
 function placeOre(tile, size, amount, min, max, mid) {
     for(let i = 0; i < amount; i++) {
         makeSlither(randomNumber(0, worldWidth), randomNumber(min, randomNumber(mid, max)), randomNumber(1, randomNumber(1, size)), tile, undefined, 5, randomNumber(5, 15), randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
+        genData.currentSec++;
+        updateGenBar(10);
     }
 }
 
 async function solveTileOffsets() {
+    genData.tag = "Solving tile offsets";
+    genData.maxSec = worldSize*2;
+    genData.currentSec = 0;
+
 
     tmpTileSolverArray = [];
     tmpTileSolverPreRecipe = -1;
@@ -125,6 +194,8 @@ async function solveTileOffsets() {
 
     for (let i = 0; i < worldSize; i++) {
         solveTile(i, true, true, false);
+        genData.currentSec++;
+        updateGenBar(100);
     }
 
     tmpTileSolverArray = [];
@@ -133,7 +204,10 @@ async function solveTileOffsets() {
 
     for (let i = 0; i < worldSize; i++) {
         solveTile(i, true, true, true);
+        genData.currentSec++;
+        updateGenBar(100);
     }
+    genData.currentMain++;
 }
 
 let grid;
@@ -363,10 +437,26 @@ this.onmessage = function (e) {
         await createWorld(4200, 1200);
     
         self.postMessage({
+            type: "world",
             worldWidth: worldWidth, worldHeight: worldHeight, worldSize: worldSize, worldGTCH: worldGTCH,
             tileGrid: tileGrid, wallGrid: wallGrid, offsetTileGrid: offsetTileGrid, offsetWallGrid: offsetWallGrid 
         });
     })();
 }
 
+function updateGenBar(perTick, force = false) {
 
+    if (genData.currentSec % perTick === 0) {
+
+        const d = new Date();
+        genCurrentTime = d.getTime();
+
+        if (genCurrentTime > genPreviousTime+20 || force) {
+
+            genPreviousTime = genCurrentTime;
+            self.postMessage({
+                type: "genUpdate", genData: genData
+            });
+        }
+    }
+}

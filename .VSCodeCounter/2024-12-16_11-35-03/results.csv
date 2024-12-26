@@ -1,0 +1,16 @@
+"filename", "language", "HTML", "Markdown", "CSS", "JavaScript", "JSON", "comment", "blank", "total"
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\README.md", "Markdown", 0, 1, 0, 0, 0, 0, 0, 1
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\css\style.css", "CSS", 0, 0, 18, 0, 0, 0, 3, 21
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\index.html", "HTML", 23, 0, 0, 0, 0, 0, 1, 24
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\engine.js", "JavaScript", 0, 0, 0, 336, 0, 4, 65, 405
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\gui\mainMenu.js", "JavaScript", 0, 0, 0, 158, 0, 1, 34, 193
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\json\tileData.json", "JSON", 0, 0, 0, 0, 72, 0, 6, 78
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\json\tileSolver.json", "JSON", 0, 0, 0, 0, 66, 0, 6, 72
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\mainGame.js", "JavaScript", 0, 0, 0, 45, 0, 0, 2, 47
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\rendering\render.js", "JavaScript", 0, 0, 0, 279, 0, 1, 83, 363
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\rendering\tileRenderer.js", "JavaScript", 0, 0, 0, 55, 0, 0, 14, 69
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\updating\player.js", "JavaScript", 0, 0, 0, 294, 0, 0, 41, 335
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\updating\tileEditor.js", "JavaScript", 0, 0, 0, 36, 0, 0, 8, 44
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\updating\updater.js", "JavaScript", 0, 0, 0, 3, 0, 0, 0, 3
+"c:\Users\Minecat300\OneDrive\LEFT Documents\GitHub\Terraria_remake\docs\js\world\worldGen.js", "JavaScript", 0, 0, 0, 311, 0, 2, 60, 373
+"Total", "-", 23, 1, 18, 1517, 138, 8, 323, 2028
