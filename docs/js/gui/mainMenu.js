@@ -232,7 +232,7 @@ function textButton(text, x, y, size, align, fillColor, strokeColor, hoverColor,
         ctx.fillText(text, tx, ty);
         if (m.m3) {
             m.m3 = false;
-            playSoundAsync(guiSound.tick);
+            playSoundAsync(guiSound.tick, false, true);
         }
         if (mouseDown && m.m1) {
             m.m1 = false

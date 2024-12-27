@@ -353,7 +353,16 @@ function cos(r) {
     return Math.cos(r*Math.PI/180);
 }
 
-async function playSoundAsync(audio, waitForCompletion = false) {
+async function playSoundAsync(Iaudio, waitForCompletion = false, newAudio = false) {
+
+    let audio;
+
+    if (newAudio) {
+        audio = new Audio(Iaudio.src);
+    } else {
+        audio = Iaudio;
+    }
+
     if (!(audio instanceof HTMLAudioElement)) {
         throw new Error('Input must be an HTMLAudioElement');
     }
