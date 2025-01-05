@@ -55,7 +55,7 @@ function movePlayerX() {
     const tile = tileGrid[index];
     const tileConfig = tileData[tile];
 
-    if (checkForStepSpace(index) && player.falling < 3 && tileConfig.collisionState === "solid" && Math.abs(player.speed.x) > 0) {
+    if (checkForStepSpace(index) && player.falling < 3 && ((tileConfig?.collisionState ?? "none") === "solid") && Math.abs(player.speed.x) > 0) {
         player.pos.y += 16;
         player.pos.x += player.dir*2;
         fixCollisionInDir(0, 0);
@@ -132,9 +132,9 @@ function handleKeys_leftRight() {
 }
 
 function checkForStepSpace(idx) {
-    if (tileData[tileGrid[idx+worldWidth]].collisionState === "solid") {return false;}
-    if (tileData[tileGrid[idx+worldWidth*2]].collisionState === "solid") {return false;}
-    if (tileData[tileGrid[idx+worldWidth*3]].collisionState === "solid") {return false;}
+    if ((tileData[tileGrid[idx+worldWidth]]?.collisionState ?? "none") === "solid") {return false;}
+    if ((tileData[tileGrid[idx+worldWidth*2]]?.collisionState ?? "none") === "solid") {return false;}
+    if ((tileData[tileGrid[idx+worldWidth*3]]?.collisionState ?? "none") === "solid") {return false;}
     return true;
 }
 
@@ -164,7 +164,7 @@ function fixCollisionInDir(dx, dy) {
 function fixCollisionAtPoint(x, y, part, dx, dy) {
     const tile = getTile(x, y);
     const tileConfig = tileData[tile];
-    const collisionState = tileConfig.collisionState;
+    const collisionState = tileConfig?.collisionState ?? "none";
     if (collisionState === "passThrough" || collisionState === "none") {return;}
 
     const modX = x % 16;

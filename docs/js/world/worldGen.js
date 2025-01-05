@@ -10,6 +10,11 @@ let offsetWallGrid;
 let genPreviousTime = 0;
 let genCurrentTime = 0;
 
+let maxGroundHeight;
+let minGroundHeight;
+const maxGroundMove = 0.03;
+const groundChance = 10;
+
 function getIDX(x, y) {
     return x + worldWidth * y;
 }
@@ -34,6 +39,9 @@ async function createWorld(width, height) {
     worldHeight = height;
     worldSize = width * height;
     worldGTCH = Math.ceil(height / 1.5217391304338754);
+
+    maxGroundHeight = Math.floor((worldHeight-worldGTCH)/2)+30;
+    minGroundHeight = Math.floor((worldHeight-worldGTCH)/2)-30;
 
     tileGrid = new Uint16Array(worldSize);
     wallGrid = new Uint16Array(worldSize);
@@ -81,8 +89,13 @@ function generateSky() {
     genData.maxSec = worldWidth;
     genData.currentSec = 0;
 
+    let groundOffset = Math.floor((minGroundHeight + maxGroundHeight)/2);
+    const groundSpace = maxGroundHeight - minGroundHeight;
+
+    let tmp;
+
     for (let x = 0; x < worldWidth; x++) {
-        const tY = worldGTCH + (Math.floor((worldHeight-worldGTCH)/2) + Math.floor((Math.sin(x*Math.PI/180) + 1.1*Math.sin(2*x*Math.PI/180))*3))
+        const tY = worldGTCH + groundOffset + Math.floor(Math.floor((Math.sin(x*Math.PI/180) + 1.1*Math.sin(2*x*Math.PI/180))*3));
         for (let y = tY; y < worldHeight; y++) {
             placeTile(getIDX(x, y), 0, 0);
         }
@@ -91,6 +104,35 @@ function generateSky() {
         placeTile(getIDX(x-1, tY-1), undefined, 0)
         genData.currentSec++;
         updateGenBar(10);
+        
+        if (randomNumber(1, ((groundOffset-minGroundHeight)/groundSpace)*100) < groundChance && groundOffset < maxGroundHeight) {
+            groundOffset += Math.max(0, Math.min(5, randomNumber(1, Math.round((groundSpace-(maxGroundHeight-groundOffset))*maxGroundMove))));
+        }
+        if (randomNumber(1, ((maxGroundHeight-groundOffset)/groundSpace)*100) < groundChance && groundOffset > minGroundHeight) {
+            groundOffset -= Math.max(0, Math.min(5, randomNumber(1, Math.round((groundSpace-(groundOffset-minGroundHeight))*maxGroundMove))));
+        }
+        if (true) {
+            if (randomNumber(1, 20) == 1 && maxGroundHeight < Math.floor(250/1200*worldHeight)) {
+                if (randomNumber(1, 6) == 1) {
+                    tmp = randomNumber(60, 70);
+                } else {
+                    tmp = randomNumber(1, 5);
+                    tmp = randomNumber(1, tmp);
+                }
+                maxGroundHeight += tmp;
+                minGroundHeight += tmp;
+            }
+            if (randomNumber(1, 20) == 1 && minGroundHeight > Math.floor(worldHeight-worldGTCH)-30) {
+                if (randomNumber(1, 6) == 1) {
+                    tmp = randomNumber(60, 70);
+                } else {
+                    tmp = randomNumber(1, 5);
+                    tmp = randomNumber(1, tmp);
+                }
+                maxGroundHeight -= tmp;
+                minGroundHeight -= tmp;
+            }
+        }
     }
     genData.currentMain++;
 }
