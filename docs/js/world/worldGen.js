@@ -29,7 +29,7 @@ let genData = {
 
 async function createWorld(width, height) {
     genData.tag = "Setting Up";
-    genData.maxMain = 7;
+    genData.maxMain = 8;
     genData.currentMain = 0;
     genData.maxSec = 0;
     genData.currentSec = 0;
@@ -48,6 +48,9 @@ async function createWorld(width, height) {
     offsetTileGrid = new Uint16Array(worldSize);
     offsetWallGrid = new Uint16Array(worldSize);
 
+    skyLightGrid = new Uint8Array(worldSize);
+    lightGrid = new Uint8Array(worldSize);
+
     generateWorldBase();
     generateStoneAndDirtVerity();
     generateOres();
@@ -55,9 +58,6 @@ async function createWorld(width, height) {
     generateSky();
     generateGrass();
     await solveTileOffsets();
-
-    genData.tag = "Done!"
-    updateGenBar(1, true);
 }
 
 function generateWorldBase() {
@@ -98,6 +98,8 @@ function generateSky() {
         const tY = worldGTCH + groundOffset + Math.floor(Math.floor((Math.sin(x*Math.PI/180) + 1.1*Math.sin(2*x*Math.PI/180))*3));
         for (let y = tY; y < worldHeight; y++) {
             placeTile(getIDX(x, y), 0, 0);
+            placeTile(getIDX(x+1, y), undefined, 0);
+            placeTile(getIDX(x-1, y), undefined, 0);
         }
         placeTile(getIDX(x, tY-1), undefined, 0)
         placeTile(getIDX(x+1, tY-1), undefined, 0)
@@ -229,7 +231,6 @@ async function solveTileOffsets() {
     genData.maxSec = worldSize*2;
     genData.currentSec = 0;
 
-
     tmpTileSolverArray = [];
     tmpTileSolverPreRecipe = -1;
     tmpTileSolverPreTileGroup = -1;
@@ -249,7 +250,6 @@ async function solveTileOffsets() {
         genData.currentSec++;
         updateGenBar(100);
     }
-    genData.currentMain++;
 }
 
 let grid;
@@ -463,7 +463,7 @@ async function loadJSON(path) {
 }
 
 let tileSolverData;
-let tileData;
+var tileData;
 
 let tmpTileSolverArray = [];
 let tmpTileSolverPreRecipe = -1;

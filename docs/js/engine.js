@@ -16,6 +16,8 @@ const lockAsp = 16/9;
 const viewspaceWidth = 1600;
 const viewspaceHeight = 900;
 
+let screenBoarders = true;
+
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
 
 let time = 0;
@@ -153,7 +155,7 @@ function stampImage
         c.drawImage(
             img,
             cropX, cropY, cropWidth, cropHeight,
-            x + moveX*width/img.width, y + moveY*height/img.height, cropWidth*width/img.width, cropHeight*height/img.height
+            x + moveX*width/img.width, y + moveY*height/img.height, cropWidth*width/img.width+0.5, cropHeight*height/img.height+0.5
         );
         //c.filter = 'none';
     } else {
@@ -248,6 +250,7 @@ function updateAsp(targetAsp, forceUpdate = false) {
 }
 
 function drawAsp() {
+    if (!screenBoarders) {return;}
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, screenOffsetX, c.height);
     ctx.fillRect(screenOffsetX+screenWidth, 0, screenOffsetX, c.height);
@@ -373,7 +376,7 @@ async function playSoundAsync(Iaudio, waitForCompletion = false, newAudio = fals
             await new Promise((resolve) => audio.addEventListener('ended', resolve, { once: true }));
         }
     } catch (error) {
-        console.error('Audio playback failed:', error);
+        console.warn('Audio playback failed:', error);
     }
 }
 
@@ -412,3 +415,21 @@ const waitUntil = (conditionFn, interval = 100) => {
         checkCondition();
     });
 };
+
+function drawRect(x, y, width, height, strokeSize, strokeColor, fillColor) {
+    x = x/viewspaceWidth*screenWidth + screenOffsetX;
+    y = y/viewspaceHeight*screenHeight + screenOffsetY;
+
+    width = width/viewspaceWidth*screenWidth;
+    height = height/viewspaceHeight*screenHeight;
+
+    strokeSize = strokeSize/((viewspaceWidth+viewspaceHeight)/2)*((screenWidth+screenHeight)/2)
+
+    ctx.fillStyle = fillColor;
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = strokeSize;
+    ctx.fillRect(x, y, width, height);
+    if (strokeSize > 0) {
+        ctx.strokeRect(x, y, width, height);
+    }
+}

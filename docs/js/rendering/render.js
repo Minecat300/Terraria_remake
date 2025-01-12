@@ -134,13 +134,50 @@ function updateViewspace(worker, grid, offsetGrid, tileSize) {
             chunkY = Math.floor(chunkY/chunkSize.height)*chunkSize.height;
             const key = chunkX + "," + chunkY;
             if (tileBitmap[key] === undefined) {
-                requestChuck(worker, grid, offsetGrid, viewspaceGridX + x*chunkSize.width, viewspaceGridY + y*chunkSize.height, tileSize);
+                requestChunk(worker, grid, offsetGrid, viewspaceGridX + x*chunkSize.width, viewspaceGridY + y*chunkSize.height, tileSize);
             }
         }
     }
 }
 
-function requestChuck(worker, grid, offsetGrid, x, y, tileSize) {
+function updateLightViewspace(worker, skyGrid, grid, settings) {
+
+    const viewspaceGridWidth = Math.ceil(viewspaceWidth/(tilesheetSize*cam.zoom*chunkSize.width))+2;
+    const viewspaceGridHeight = Math.ceil(viewspaceHeight/(tilesheetSize*cam.zoom*chunkSize.height))+2;
+
+    const viewspaceGridX = Math.floor(cam.x/tilesheetSize + chunkSize.width/2) - Math.ceil(viewspaceGridWidth*chunkSize.width/2);
+    const viewspaceGridY = Math.floor(cam.y/tilesheetSize + chunkSize.height/2) - Math.ceil(viewspaceGridHeight*chunkSize.height/2);
+
+    for(let x = 0; x < viewspaceGridWidth; x++) {
+        let chunkX = x*chunkSize.width + viewspaceGridX;
+        chunkX = Math.floor(chunkX/chunkSize.width)*chunkSize.width;
+        for(let y = 0; y < viewspaceGridHeight; y++) {
+            let chunkY = y*chunkSize.height + viewspaceGridY;
+            chunkY = Math.floor(chunkY/chunkSize.height)*chunkSize.height;
+            const key = chunkX + "," + chunkY;
+            if (tileBitmap[key] === undefined) {
+                requestLightChunk(worker, skyGrid, grid, viewspaceGridX + x*chunkSize.width, viewspaceGridY + y*chunkSize.height, settings);
+            }
+        }
+    }
+}
+
+function requestLightChunk(worker, skyGrid, grid, x, y, settings) {
+    
+    const chunkX = Math.floor(x/chunkSize.width)*chunkSize.width;
+    const chunkY = Math.floor(y/chunkSize.height)*chunkSize.height;
+
+    let skyChunkGrid = extractViewspace(skyGrid, chunkX, chunkY, chunkSize.width, chunkSize.height);
+    let chunkGrid = extractViewspace(grid, chunkX, chunkY, chunkSize.width, chunkSize.height);
+
+    if (chunkGrid === undefined) {
+        return;
+    }
+
+    createLightMap(worker, skyChunkGrid, chunkGrid, chunkSize.width, chunkSize.height, settings, { x: chunkX, y: chunkY, time: new Date().getTime() });
+}
+
+function requestChunk(worker, grid, offsetGrid, x, y, tileSize) {
 
     const chunkX = Math.floor(x/chunkSize.width)*chunkSize.width;
     const chunkY = Math.floor(y/chunkSize.height)*chunkSize.height;
@@ -152,7 +189,7 @@ function requestChuck(worker, grid, offsetGrid, x, y, tileSize) {
         return;
     }
 
-    createTileMap(worker, chunkGrid, chunkSize.width, chunkSize.height, chunkOffsetGrid, tileSize, { x: chunkX, y: chunkY })
+    createTileMap(worker, chunkGrid, chunkSize.width, chunkSize.height, chunkOffsetGrid, tileSize, { x: chunkX, y: chunkY });
 }
 
 function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight) {
@@ -171,26 +208,62 @@ function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight) {
     
 }
 
-function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, bitmap) {
+function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, bitmap, padding, forground = false) {
+
+    const layerCanvas = new OffscreenCanvas(viewspaceGridWidth*chunkSize.width*8, viewspaceGridHeight*chunkSize.height*8);
+    const layerCtx = layerCanvas.getContext("2d");
+    layerCtx.imageSmoothingEnabled = false;
 
     for (let x = 0; x < viewspaceGridWidth; x++) {
         let chunkX = x*chunkSize.width + viewspaceGridX;
         chunkX = Math.floor(chunkX/chunkSize.width)*chunkSize.width;
-        for (let y = 0; y < viewspaceGridHeight; y++) {
+
+        for (let y = viewspaceGridHeight-1; y >= 0; y--) {
             let chunkY = y*chunkSize.height + viewspaceGridY;
             chunkY = Math.floor(chunkY/chunkSize.height)*chunkSize.height;
+
             const key = chunkX + "," + chunkY;
-            if (bitmap[key] != undefined) {
-                const value = bitmap[key];
-                if (value.image != undefined) {
-                    const drawX = (chunkX*tilesheetSize - cam.x) * cam.zoom + viewspaceWidth/2 + chunkSize.width*tilesheetSize*cam.zoom/2;
-                    const drawY = (chunkY*tilesheetSize - cam.y) * cam.zoom + viewspaceHeight/2 + chunkSize.height*tilesheetSize*cam.zoom/2;
-                    drawAdvImage(ctx, value.image, new moveMatrix(drawX, viewspaceHeight-drawY, value.image.width*cam.zoom, undefined));
+            if (bitmap[key] == undefined) {continue;}
+
+            usedKeys.add(key);
+            const value = bitmap[key];
+            if (value.image == undefined) {continue;}
+
+            const drawX = x*chunkSize.width*8 - padding;
+            const drawY = (viewspaceGridHeight-y-1)*chunkSize.height*8 - padding;
+
+            layerCtx.drawImage(value.image, drawX, drawY, chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2);
+            if (forground && chunkUpdates) {
+                if (requestedLightChunks.includes(key)) {
+                    layerCtx.fillStyle = "rgba(0, 255, 0, 0.3)";
+                    layerCtx.fillRect(drawX, drawY, chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2);
                 }
-                usedKeys.add(key);
+                if (requestedChunks.includes(key)) {
+                    layerCtx.fillStyle = "rgba(0, 0, 255, 0.3)";
+                    layerCtx.fillRect(drawX, drawY, chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2);
+                }
+            }
+            if (forground && chunkBoarders) {
+
+                layerCtx.strokeStyle = "red";
+                layerCtx.strokeRect(drawX, drawY, chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2);
             }
         }
     }
+
+    /*layerCanvas.convertToBlob().then((blob) => {
+        download(blob, "layer.png", "png");
+    });*/
+    
+    const img = layerCanvas;
+
+    const chunkX = Math.floor(viewspaceGridX/chunkSize.width)*chunkSize.width;
+    const chunkY = Math.floor(viewspaceGridY/chunkSize.height)*chunkSize.height;
+
+    const drawX = (chunkX*tilesheetSize - cam.x + img.width) * cam.zoom + viewspaceWidth/2;
+    const drawY = (chunkY*tilesheetSize - cam.y + img.height) * cam.zoom + viewspaceHeight/2;
+
+    drawAdvImage(ctx, img, new moveMatrix(drawX, viewspaceHeight - drawY, img.width*cam.zoom*2, undefined));
 }
 
 function drawTileFrame() {
@@ -203,8 +276,11 @@ function drawTileFrame() {
 
     usedKeys = new Set();
 
-    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, wallBitmap);
-    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, tileBitmap);
+    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, wallBitmap, 4);
+    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, tileBitmap, 0, xray);
+    if (!xray) {
+        drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, lightBitmap, 0, true);
+    }
 
     for (const key in tileBitmap) {
         if (!usedKeys.has(key)) {
@@ -222,26 +298,40 @@ function drawTileFrame() {
     
     let i = 0;
 
-    for (const key in requestedChuncks) {
-        const value = requestedChuncks[key];
+    for (const key in requestedChunks) {
+        const value = requestedChunks[key];
         if (usedKeys.has(value)) {
             let [x, y] = value.split(",");
-            updateChuck(x, y);
-            requestedChuncks.splice(i, 1);
+            updateChunk(x, y);
+            requestedChunks.splice(i, 1);
+            i--
+        }
+        i++
+    }
+
+    i = 0;
+
+    for (const key in requestedLightChunks) {
+        const value = requestedLightChunks[key];
+        if (usedKeys.has(value)) {
+            let [x, y] = value.split(",");
+            requestLightChunk(lightWorker, skyLightGrid, lightGrid, x, y, {dayNight: 1, smoothing: 1});
+            requestedLightChunks.splice(i, 1);
             i--
         }
         i++
     }
 }
 
-function updateChuck(x, y) {
-    requestChuck(wallWorker, wallGrid, offsetWallGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
-    requestChuck(tileWorker, tileGrid, offsetTileGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
+function updateChunk(x, y) {
+    requestChunk(wallWorker, wallGrid, offsetWallGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
+    requestChunk(tileWorker, tileGrid, offsetTileGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
 }
 
 function updateFullView() {
     updateViewspace(wallWorker, wallGrid, offsetWallGrid, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
     updateViewspace(tileWorker, tileGrid, offsetTileGrid, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
+    updateLightViewspace(lightWorker, skyLightGrid, lightGrid, {dayNight: 1, smoothing: 1});
 }
 
 function createTileMap(worker, viewportTilesData, viewportTilesWidth, viewportTilesHeight, viewportTilesOffset, tileSize, data) {
@@ -260,8 +350,25 @@ function createTileMap(worker, viewportTilesData, viewportTilesWidth, viewportTi
     });
 }
 
+function createLightMap(worker, skyGrid, grid, gridWidth, gridHeight, settings, data) {
+    
+    const viewportTiles = {
+        data: grid,
+        skyData: skyGrid,
+        width: gridWidth,
+        height: gridHeight
+    }
+    
+    worker.postMessage({
+        viewportTiles: viewportTiles,
+        settings: settings,
+        data: data
+    });
+}
+
 const tileWorker = new Worker("js/rendering/tileRenderer.js");
 const wallWorker = new Worker("js/rendering/tileRenderer.js");
+const lightWorker = new Worker("js/rendering/lightRenderer.js");
 
 let beeps = false;
 
@@ -279,10 +386,16 @@ const chunkSize = {
     height: 18,
 }
 
-let requestedChuncks = [];
+let chunkBoarders = false;
+let chunkUpdates = false;
+let xray = false;
+
+let requestedChunks = [];
+let requestedLightChunks = [];
 
 let tileBitmap = {};
 let wallBitmap = {};
+let lightBitmap = {};
 let prevCam = {
     x: 0,
     y: 0,
@@ -360,3 +473,15 @@ wallWorker.onmessage = (e) => {
     });
 }
 
+lightWorker.onmessage = (e) => {
+    const frame = e.data.frame;
+    const data = e.data.data;
+    const key = data.x + "," + data.y;
+    if (lightBitmap[key] == undefined || lightBitmap[key].data.time <= data.time) {
+        createImageBitmap(frame).then((bitmap) => {
+            lightBitmap[key] = {};
+            lightBitmap[key].image = bitmap;
+            lightBitmap[key].data = data;
+        });
+    }
+}

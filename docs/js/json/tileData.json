@@ -7,7 +7,8 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "none",
         "collisionState": "passThrough",
-        "wall": false
+        "wall": false,
+        "lightBlock": 5
     },
 
     {
@@ -18,7 +19,8 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false
+        "wall": false,
+        "lightBlock": 45
     },
 
     {
@@ -29,7 +31,8 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false
+        "wall": false,
+        "lightBlock": 45
     },
 
     {
@@ -40,7 +43,8 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false
+        "wall": false,
+        "lightBlock": 45
     },
 
     {
@@ -51,7 +55,8 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false
+        "wall": false,
+        "lightBlock": 45
     },
 
     {
@@ -62,7 +67,8 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false
+        "wall": false,
+        "lightBlock": 45
     },
 
     {
@@ -73,6 +79,7 @@
         "tileAssetSize": {"width": 32, "height": 32},
         "tileSolver": "default",
         "collisionState": "none",
-        "wall": true
+        "wall": true,
+        "lightBlock": 8
     }
 ]

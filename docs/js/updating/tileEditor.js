@@ -10,10 +10,32 @@ function creativeEditTiles() {
         brush = tile;
     }
     if (mouseDown) {
-        tileGrid[index] = brush;
-        updateTileSolving(index);
-        requestChunkUpdate(index);
+        placeTile(brush, index, tileData[brush].wall);
     }
+}
+
+function placeTile(tile, idx, wall = false) {
+    if (tile == 0) {breakBlock(idx, wall);}
+
+    if (wall) {
+        wallGrid[idx] = tile;
+    } else {
+        tileGrid[idx] = tile;
+    }
+    updateTileSolving(idx, wall);
+    requestChunkUpdate(idx);
+    updateSkyLight(idx);
+}
+
+function breakBlock(idx, wall = false) {
+    if (wall) {
+        wallGrid[idx] = 0;
+    } else {
+        tileGrid[idx] = 0;
+    }
+    updateTileSolving(idx, wall);
+    requestChunkUpdate(idx);
+    updateSkyLight(idx);
 }
 
 function updateTileSolving(idx, wall = false) {
@@ -22,11 +44,11 @@ function updateTileSolving(idx, wall = false) {
     solveTile(idx + 1, false, false, wall);
     solveTile(idx - worldWidth, false, false, wall);
     solveTile(idx - 1, false, false, wall);
-    requestChunkUpdate(idx, wall);
-    requestChunkUpdate(idx + worldWidth, wall);
-    requestChunkUpdate(idx + 1, wall);
-    requestChunkUpdate(idx - worldWidth, wall);
-    requestChunkUpdate(idx - 1, wall);
+    requestChunkUpdate(idx);
+    requestChunkUpdate(idx + worldWidth);
+    requestChunkUpdate(idx + 1);
+    requestChunkUpdate(idx - worldWidth);
+    requestChunkUpdate(idx - 1);
 }
 
 function requestChunkUpdate(idx) {
@@ -38,7 +60,7 @@ function requestChunkUpdate(idx) {
 
     const chunckIdx = chunkX + "," + chunkY;
 
-    if (!requestedChuncks.includes(chunckIdx)) {
-        requestedChuncks.push(chunckIdx);
+    if (!requestedChunks.includes(chunckIdx)) {
+        requestedChunks.push(chunckIdx);
     }
 }

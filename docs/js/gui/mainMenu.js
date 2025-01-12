@@ -75,10 +75,10 @@ function drawLogo() {
 }
 
 function drawLoadingBar() {
-    drawRect((viewspaceWidth-viewspaceWidth*guiImgs.OuterCorrupt.width/1100)/2, viewspaceHeight/2+8, viewspaceWidth*guiImgs.OuterCorrupt.width/1100, viewspaceWidth*guiImgs.OuterCorrupt.width/35000, "#434343");
-    drawRect((viewspaceWidth-viewspaceWidth*guiImgs.OuterCorrupt.width/1100)/2, viewspaceHeight/2+8, viewspaceWidth*guiImgs.OuterCorrupt.width/1100*genData.currentMain/genData.maxMain, viewspaceWidth*guiImgs.OuterCorrupt.width/35000, "lime");
-    drawRect((viewspaceWidth-viewspaceWidth*guiImgs.OuterLower.width/1050)/2, viewspaceHeight/2+40, viewspaceWidth*guiImgs.OuterLower.width/1050, viewspaceWidth*guiImgs.OuterLower.width/50000, "#434343");
-    drawRect((viewspaceWidth-viewspaceWidth*guiImgs.OuterLower.width/1050)/2, viewspaceHeight/2+40, viewspaceWidth*guiImgs.OuterLower.width/1050*genData.currentSec/genData.maxSec, viewspaceWidth*guiImgs.OuterLower.width/50000, "#00aeff");
+    drawRect((viewspaceWidth-viewspaceWidth*guiImgs.OuterCorrupt.width/1100)/2, viewspaceHeight/2+8, viewspaceWidth*guiImgs.OuterCorrupt.width/1100, viewspaceWidth*guiImgs.OuterCorrupt.width/35000, 0, "", "#434343");
+    drawRect((viewspaceWidth-viewspaceWidth*guiImgs.OuterCorrupt.width/1100)/2, viewspaceHeight/2+8, viewspaceWidth*guiImgs.OuterCorrupt.width/1100*genData.currentMain/genData.maxMain, viewspaceWidth*guiImgs.OuterCorrupt.width/35000, 0, "", "lime");
+    drawRect((viewspaceWidth-viewspaceWidth*guiImgs.OuterLower.width/1050)/2, viewspaceHeight/2+40, viewspaceWidth*guiImgs.OuterLower.width/1050, viewspaceWidth*guiImgs.OuterLower.width/50000, 0, "", "#434343");
+    drawRect((viewspaceWidth-viewspaceWidth*guiImgs.OuterLower.width/1050)/2, viewspaceHeight/2+40, viewspaceWidth*guiImgs.OuterLower.width/1050*genData.currentSec/genData.maxSec, viewspaceWidth*guiImgs.OuterLower.width/50000, 0, "", "#00aeff");
     drawAdvImage(ctx, guiImgs.OuterCorrupt, new moveMatrix(viewspaceWidth/2, viewspaceHeight/2, viewspaceWidth*guiImgs.OuterCorrupt.width/1000, undefined));
     drawAdvImage(ctx, guiImgs.OuterLower, new moveMatrix(viewspaceWidth/2, viewspaceHeight/2+viewspaceWidth/20.7, viewspaceWidth*guiImgs.OuterLower.width/1000, undefined));
     drawOnlyText(genData.tag, viewspaceWidth/2, viewspaceHeight/2.5, 50, "center", "white", "black");
@@ -146,6 +146,7 @@ async function loadBackgroundImages() {
 startMainMenu();
 
 let worldGenWorker = new Worker("js/world/worldGen.js");
+let lightEngineWorker = new Worker("js/world/lightEngine.js");
 
 //setupWorld();
 
@@ -164,7 +165,7 @@ async function setupWorld() {
 
 
 worldGenWorker.onmessage = (e) => {
-    const data = e.data
+    const data = e.data;
 
     if (data.type == "world") {
         worldWidth = data.worldWidth;
@@ -178,6 +179,31 @@ worldGenWorker.onmessage = (e) => {
     
         worldGenWorker.terminate();
 
+        genData.currentMain++;
+
+        lightEngineWorker.postMessage({
+            tileData: tileData,
+            tileGrid: tileGrid,
+            wallGrid: wallGrid,
+            genData: genData,
+            worldSize: {width: worldWidth, height: worldHeight}
+        });
+
+    }
+    if (data.type == "genUpdate") {
+        genData = data.genData;
+    }
+}
+
+lightEngineWorker.onmessage = (e) => {
+    const data = e.data;
+
+    if (data.type == "world") {
+        skyLightGrid = new Uint8Array(data.skyLightGrid);
+        lightGrid = new Uint8Array(data.lightGrid);
+
+        lightEngineWorker.terminate();
+
         (async () => {
             await sleep(2000);
             startGame();
@@ -185,7 +211,6 @@ worldGenWorker.onmessage = (e) => {
             guiSound.music.pause();
             guiSound.music.currentTime = 0;
         })();
-
     }
     if (data.type == "genUpdate") {
         genData = data.genData;
@@ -265,15 +290,4 @@ function drawOnlyText(text, x, y, size, align, fillColor, strokeColor) {
     
     ctx.fillStyle = fillColor;
     ctx.fillText(text, tx, ty);
-}
-
-function drawRect(x, y, width, height, color) {
-    const tx = x/viewspaceWidth*screenWidth+screenOffsetX;
-    const ty = y/viewspaceHeight*screenHeight+screenOffsetY;
-
-    const tWidth = width/viewspaceWidth*screenWidth;
-    const tHeight = height/viewspaceHeight*screenHeight;
-
-    ctx.fillStyle = color;
-    ctx.fillRect(tx, ty, tWidth, tHeight);
 }
