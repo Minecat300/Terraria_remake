@@ -329,6 +329,10 @@ function gridAlign(value) {
     return Math.floor(value/tilesheetSize)*tilesheetSize
 }
 
+function getGridPos(value) {
+    return Math.floor(value/16);
+}
+
 function getTile(x, y) {
     return tileGrid[getIDX(Math.floor(x/16), Math.floor(y/16))];
 }

@@ -118,7 +118,7 @@ function loadBodypartColor(key, part, color) {
     playerLoadedAssets[key][part] = oc.transferToImageBitmap();
 }
 
-function updateViewspace(worker, grid, offsetGrid, tileSize) {
+function updateViewspace(worker, grid, offsetGrid, tileSize, force = false) {
 
     const viewspaceGridWidth = Math.ceil(viewspaceWidth/(tilesheetSize*cam.zoom*chunkSize.width))+2;
     const viewspaceGridHeight = Math.ceil(viewspaceHeight/(tilesheetSize*cam.zoom*chunkSize.height))+2;
@@ -133,14 +133,14 @@ function updateViewspace(worker, grid, offsetGrid, tileSize) {
             let chunkY = y*chunkSize.height + viewspaceGridY;
             chunkY = Math.floor(chunkY/chunkSize.height)*chunkSize.height;
             const key = chunkX + "," + chunkY;
-            if (tileBitmap[key] === undefined) {
+            if (tileBitmap[key] === undefined || force) {
                 requestChunk(worker, grid, offsetGrid, viewspaceGridX + x*chunkSize.width, viewspaceGridY + y*chunkSize.height, tileSize);
             }
         }
     }
 }
 
-function updateLightViewspace(worker, skyGrid, grid, settings) {
+function updateLightViewspace(worker, skyGrid, grid, settings, force = false) {
 
     const viewspaceGridWidth = Math.ceil(viewspaceWidth/(tilesheetSize*cam.zoom*chunkSize.width))+2;
     const viewspaceGridHeight = Math.ceil(viewspaceHeight/(tilesheetSize*cam.zoom*chunkSize.height))+2;
@@ -155,7 +155,7 @@ function updateLightViewspace(worker, skyGrid, grid, settings) {
             let chunkY = y*chunkSize.height + viewspaceGridY;
             chunkY = Math.floor(chunkY/chunkSize.height)*chunkSize.height;
             const key = chunkX + "," + chunkY;
-            if (tileBitmap[key] === undefined) {
+            if (tileBitmap[key] === undefined || force) {
                 requestLightChunk(worker, skyGrid, grid, viewspaceGridX + x*chunkSize.width, viewspaceGridY + y*chunkSize.height, settings);
             }
         }
@@ -167,8 +167,8 @@ function requestLightChunk(worker, skyGrid, grid, x, y, settings) {
     const chunkX = Math.floor(x/chunkSize.width)*chunkSize.width;
     const chunkY = Math.floor(y/chunkSize.height)*chunkSize.height;
 
-    let skyChunkGrid = extractViewspace(skyGrid, chunkX, chunkY, chunkSize.width, chunkSize.height);
-    let chunkGrid = extractViewspace(grid, chunkX, chunkY, chunkSize.width, chunkSize.height);
+    let skyChunkGrid = extractViewspace(skyGrid, chunkX-1, chunkY-1, chunkSize.width+2, chunkSize.height+2);
+    let chunkGrid = extractViewspace(grid, chunkX-1, chunkY-1, chunkSize.width+2, chunkSize.height+2);
 
     if (chunkGrid === undefined) {
         return;
@@ -206,6 +206,10 @@ function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight) {
     }
     return viewspace;
     
+}
+
+function getLight(idx, settings) {
+    return  Math.floor(Math.max(skyLightGrid[idx] * settings.dayNight, lightGrid[idx]));
 }
 
 function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, bitmap, padding, forground = false) {
@@ -295,6 +299,12 @@ function drawTileFrame() {
         prevCam.zoom = cam.zoom;
         updateFullView();
     }
+
+    if (smoothing != oldSmoothing || dayNight != oldDayNight) {
+        oldSmoothing = smoothing;
+        oldDayNight = dayNight;
+        updateLightViewspace(lightWorker, skyLightGrid, lightGrid, {dayNight: dayNight, smoothing: smoothing}, true);
+    }
     
     let i = 0;
 
@@ -315,7 +325,7 @@ function drawTileFrame() {
         const value = requestedLightChunks[key];
         if (usedKeys.has(value)) {
             let [x, y] = value.split(",");
-            requestLightChunk(lightWorker, skyLightGrid, lightGrid, x, y, {dayNight: 1, smoothing: 1});
+            requestLightChunk(lightWorker, skyLightGrid, lightGrid, x, y, {dayNight: dayNight, smoothing: smoothing});
             requestedLightChunks.splice(i, 1);
             i--
         }
@@ -331,7 +341,7 @@ function updateChunk(x, y) {
 function updateFullView() {
     updateViewspace(wallWorker, wallGrid, offsetWallGrid, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
     updateViewspace(tileWorker, tileGrid, offsetTileGrid, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
-    updateLightViewspace(lightWorker, skyLightGrid, lightGrid, {dayNight: 1, smoothing: 1});
+    updateLightViewspace(lightWorker, skyLightGrid, lightGrid, {dayNight: dayNight, smoothing: smoothing});
 }
 
 function createTileMap(worker, viewportTilesData, viewportTilesWidth, viewportTilesHeight, viewportTilesOffset, tileSize, data) {
@@ -389,6 +399,12 @@ const chunkSize = {
 let chunkBoarders = false;
 let chunkUpdates = false;
 let xray = false;
+
+let dayNight = 1;
+let smoothing = 2;
+
+let oldDayNight = dayNight;
+let oldSmoothing = smoothing;
 
 let requestedChunks = [];
 let requestedLightChunks = [];

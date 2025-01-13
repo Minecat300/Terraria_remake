@@ -243,6 +243,8 @@ function resetPlayer() {
 
 function drawPlayer() {
 
+    const light = getLight(getIDX(getGridPos(player.pos.x), getGridPos(player.pos.y)), {dayNight: dayNight});
+
     const Anispeed = 1.5;
 
     const frame = player.frame;
@@ -286,50 +288,55 @@ function drawPlayer() {
         "default",
         viewspaceWidth/2 + (player.pos.x - cam.x)*cam.zoom, viewspaceHeight/2 + (cam.y - player.pos.y - 2)*cam.zoom, cam.zoom, player.dir,
         helmet, chestplate, greaves,
-        {x: Number(player.falling > 1), y: 0}, arms, legsTime + 6, legs, legsTime, bodyTime
+        {x: Number(player.falling > 1), y: 0}, arms, legsTime + 6, legs, legsTime, bodyTime,
+        100 - Math.min(100, light/120*100)
     );
 
 }
 
-function drawCharacter(playerAssets, x, y, scale, dir, helmet, chestplate, greaves, bodyState, armState, headState, legsState, hairState, bodyOffsetY) {
+function drawCharacter(playerAssets, x, y, scale, dir, helmet, chestplate, greaves, bodyState, armState, headState, legsState, hairState, bodyOffsetY, light) {
     playerAssets = playerLoadedAssets[playerAssets];
 
     if (chestplate === undefined) {
-        drawBodypart(playerAssets.arms, x, y, scale, dir, armState.x, armState.y + 2, bodyOffsetY);
-        drawBodypart(playerAssets.hands, x, y, scale, dir, armState.x, armState.y + 2, bodyOffsetY);
+        drawBodypart(playerAssets.arms, x, y, scale, dir, armState.x, armState.y + 2, light, bodyOffsetY);
+        drawBodypart(playerAssets.hands, x, y, scale, dir, armState.x, armState.y + 2, light, bodyOffsetY);
     } else {
-        drawBodypart(playerImages[chestplate], x, y, scale, dir, armState.x, armState.y + 2, bodyOffsetY);
+        drawBodypart(playerImages[chestplate], x, y, scale, dir, armState.x, armState.y + 2, light, bodyOffsetY);
     }
     if (greaves === undefined) {
-        drawBodypart(playerAssets.pants, x, y, scale, dir, 0, legsState);
-        drawBodypart(playerAssets.shoes, x, y, scale, dir, 0, legsState);
+        drawBodypart(playerAssets.pants, x, y, scale, dir, 0, legsState, light);
+        drawBodypart(playerAssets.shoes, x, y, scale, dir, 0, legsState, light);
     } else {
-        drawBodypart(playerImages[greaves], x, y, scale, dir, 0, legsState);
+        drawBodypart(playerImages[greaves], x, y, scale, dir, 0, legsState, light);
     }
-    drawBodypart(playerAssets.body, x, y, scale, dir, bodyState.x, bodyState.y, bodyOffsetY);
+    drawBodypart(playerAssets.body, x, y, scale, dir, bodyState.x, bodyState.y, light, bodyOffsetY);
     if (chestplate != undefined) {
-        drawBodypart(playerImages[chestplate], x, y, scale, dir, bodyState.x, bodyState.y, bodyOffsetY);
+        drawBodypart(playerImages[chestplate], x, y, scale, dir, bodyState.x, bodyState.y, light, bodyOffsetY);
     }
-    drawBodypart(playerAssets.head, x, y, scale, dir, 0, headState);
-    drawBodypart(playerAssets.eye1, x, y, scale, dir, 0, headState);
-    drawBodypart(playerAssets.eye2, x, y, scale, dir, 0, headState);
+    drawBodypart(playerAssets.head, x, y, scale, dir, 0, headState, light);
+    drawBodypart(playerAssets.eye1, x, y, scale, dir, 0, headState, light);
+    drawBodypart(playerAssets.eye2, x, y, scale, dir, 0, headState, light);
     if (helmet === undefined) {
-        drawBodypart(playerAssets.hair, x, y, scale, dir, 0, hairState);
+        drawBodypart(playerAssets.hair, x, y, scale, dir, 0, hairState, light);
     } else {
-        drawBodypart(playerImages[helmet], x, y, scale, dir, 0, headState);
+        drawBodypart(playerImages[helmet], x, y, scale, dir, 0, headState, light);
     }
     if (chestplate === undefined) {
-        drawBodypart(playerAssets.arms, x, y, scale, dir, armState.x, armState.y, bodyOffsetY);
-        drawBodypart(playerAssets.hands, x, y, scale, dir, armState.x, armState.y, bodyOffsetY);
+        drawBodypart(playerAssets.arms, x, y, scale, dir, armState.x, armState.y, light, bodyOffsetY);
+        drawBodypart(playerAssets.hands, x, y, scale, dir, armState.x, armState.y, light, bodyOffsetY);
     } else {
-        drawBodypart(playerImages[chestplate], x, y, scale, dir, armState.x, armState.y, bodyOffsetY);
+        drawBodypart(playerImages[chestplate], x, y, scale, dir, armState.x, armState.y, light, bodyOffsetY);
     }
 }
 
-function drawBodypart(img, x, y, scale, dir, cx, cy, pixleOffsetY = 0) {
+function drawBodypart(img, x, y, scale, dir, cx, cy, light, pixleOffsetY = 0) {
 
     cx *= 40/img.width;
     cy *= 56/img.height;
 
     drawAdvImage(ctx, img, new moveMatrix(x, y - pixleOffsetY*scale*2, scale*img.width*dir, scale*img.height), undefined, new cropMatrix(cx, cy, 40/img.width, 54/img.height), true);
-}
+    if (light == 0 || xray) {return;}
+    ctx.filter = `brightness(0%) opacity(${light}%)`;
+    drawAdvImage(ctx, img, new moveMatrix(x, y - pixleOffsetY*scale*2, scale*img.width*dir, scale*img.height), undefined, new cropMatrix(cx, cy, 40/img.width, 54/img.height), true);
+    ctx.filter = 'none';
+} 
