@@ -121,6 +121,11 @@ function updateKeyboard(event, state) {
                 creative = !creative;
             }
             break;
+        case "escape":
+            if (!state) {
+                inventoryOpen = !inventoryOpen;
+            }
+            break;
     }
 }
 
@@ -176,24 +181,30 @@ function stampImage
     }
 }
 
-function moveMatrix(x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
+class moveMatrix {
+    constructor(x, y, width, height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
 }
 
-function rotationMatrix(rotate, cx, cy) {
-    this.rotate = rotate;
-    this.cx = cx;
-    this.cy = cy;
+class rotationMatrix {
+    constructor(rotate, cx, cy) {
+        this.rotate = rotate;
+        this.cx = cx;
+        this.cy = cy;
+    }
 }
 
-function cropMatrix(cropX, cropY, cropWidth, cropHeight) {
-    this.cropX = cropX;
-    this.cropY = cropY;
-    this.cropWidth = cropWidth;
-    this.cropHeight = cropHeight;
+class cropMatrix {
+    constructor(cropX, cropY, cropWidth, cropHeight) {
+        this.cropX = cropX;
+        this.cropY = cropY;
+        this.cropWidth = cropWidth;
+        this.cropHeight = cropHeight;
+    }
 }
 
 function drawAdvImage(c, img, MM, RM = new rotationMatrix(0, 0, 0), CM = new cropMatrix(0, 0, 1, 1), overrideRotate) {

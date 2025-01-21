@@ -154,8 +154,10 @@ async function setupWorld() {
 
     tileData = await loadJSON('./js/json/tileData.json');
     tileSolverData = await loadJSON('./js/json/tileSolver.json');
+    itemData = await loadJSON('./js/json/itemData.json');
     console.log(tileData);
     console.log(tileSolverData);
+    console.log(itemData);
 
     worldGenWorker.postMessage({
         tileData: tileData,

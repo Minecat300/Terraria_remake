@@ -1,5 +1,5 @@
-[
-    {
+{
+    "0": {
         "id": 0,
         "name": "Air",
         "startIDX": {"x": 0, "y": 0},
@@ -11,7 +11,7 @@
         "lightBlock": 5
     },
 
-    {
+    "1": {
         "id": 1,
         "name": "Dirt",
         "startIDX": {"x": 0, "y": 0},
@@ -23,7 +23,7 @@
         "lightBlock": 45
     },
 
-    {
+    "2": {
         "id": 2,
         "name": "Stone",
         "startIDX": {"x": 0, "y": 15},
@@ -35,7 +35,7 @@
         "lightBlock": 45
     },
 
-    {
+    "3": {
         "id": 3,
         "name": "Grass",
         "startIDX": {"x": 0, "y": 30},
@@ -47,7 +47,7 @@
         "lightBlock": 45
     },
 
-    {
+    "4": {
         "id": 4,
         "name": "Iron Ore",
         "startIDX": {"x": 0, "y": 52},
@@ -59,7 +59,7 @@
         "lightBlock": 45
     },
 
-    {
+    "5": {
         "id": 5,
         "name": "Copper Ore",
         "startIDX": {"x": 0, "y": 67},
@@ -71,7 +71,7 @@
         "lightBlock": 45
     },
 
-    {
+    "6": {
         "id": 6,
         "name": "Dirt Wall",
         "startIDX": {"x": 0, "y": 5},
@@ -82,4 +82,4 @@
         "wall": true,
         "lightBlock": 8
     }
-]
+}

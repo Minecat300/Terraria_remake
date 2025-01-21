@@ -246,6 +246,11 @@ function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX
                     layerCtx.fillStyle = "rgba(0, 0, 255, 0.3)";
                     layerCtx.fillRect(drawX, drawY, chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2);
                 }
+                layerCtx.font = "20px Andy-Bold";
+                layerCtx.fillStyle = "white";
+                layerCtx.textBaseline = "middle"
+                layerCtx.textAlign = "center";
+                layerCtx.fillText(key, drawX + chunkSize.width*4, drawY + chunkSize.height*4);
             }
             if (forground && chunkBoarders) {
 
@@ -308,28 +313,28 @@ function drawTileFrame() {
     
     let i = 0;
 
-    for (const key in requestedChunks) {
-        const value = requestedChunks[key];
+    while (i < requestedChunks.length) {
+        const value = requestedChunks[i];
         if (usedKeys.has(value)) {
             let [x, y] = value.split(",");
             updateChunk(x, y);
             requestedChunks.splice(i, 1);
-            i--
+        } else {
+            i++;
         }
-        i++
     }
 
     i = 0;
 
-    for (const key in requestedLightChunks) {
-        const value = requestedLightChunks[key];
+    while (i < requestedLightChunks.length) {
+        const value = requestedLightChunks[i];
         if (usedKeys.has(value)) {
-            let [x, y] = value.split(",");
-            requestLightChunk(lightWorker, skyLightGrid, lightGrid, x, y, {dayNight: dayNight, smoothing: smoothing});
+            const [x, y] = value.split(",");
+            requestLightChunk(lightWorker, skyLightGrid, lightGrid, x, y, { dayNight: dayNight, smoothing: smoothing });
             requestedLightChunks.splice(i, 1);
-            i--
+        } else {
+            i++;
         }
-        i++
     }
 }
 
@@ -441,6 +446,8 @@ async function startGame() {
         {h: 78, s: 40, l: 145}
     );
 
+    await loadItemImages();
+
     createImageBitmap(tilesImg).then((imageBitmap) => {
         tileWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData }, [imageBitmap]);
     });
@@ -463,6 +470,7 @@ function renderMain() {
     ctx.imageSmoothingEnabled = false;
     drawTileFrame();
     drawPlayer();
+    drawInventory();
     drawAsp();
 }
 

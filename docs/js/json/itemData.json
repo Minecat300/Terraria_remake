@@ -1,0 +1,41 @@
+{
+    "0": {
+        "id": 0,
+        "image": "none"
+    },
+
+    "1": {
+        "id": 1,
+        "name": "Iron Pickaxe",
+        "image": "Item_1.png",
+        "stack": 1
+    },
+
+    "2": {
+        "id": 2,
+        "name": "Dirt Block",
+        "image": "Item_2.png",
+        "stack": 9999
+    },
+
+    "3": {
+        "id": 3,
+        "name": "Stone Block",
+        "image": "Item_3.png",
+        "stack": 9999
+    },
+
+    "11": {
+        "id": 11,
+        "name": "Iron Ore",
+        "image": "Item_11.png",
+        "stack": 9999
+    },
+
+    "12": {
+        "id": 12,
+        "name": "Copper Ore",
+        "image": "Item_12.png",
+        "stack": 9999
+    }
+}
