@@ -71,7 +71,8 @@ const keyPress = {
     downArrow: false,
     leftArrow: false,
     rightArrow: false,
-    c: false
+    c: false,
+    shift: false
 }
 
 function updateKeyboard(event, state) {
@@ -106,6 +107,9 @@ function updateKeyboard(event, state) {
         case "c":
             keyPress.c = state;
             break; 
+        case "shift":
+            keyPress.shift = state;
+            break;
         case "b":
             if (state) {
                 window.open('https://www.twitch.tv/beepstr');
@@ -124,6 +128,56 @@ function updateKeyboard(event, state) {
         case "escape":
             if (!state) {
                 inventoryOpen = !inventoryOpen;
+            }
+            break;
+        case "0":
+            if (state) {
+                selectedHotbar = 9;
+            }
+            break;
+        case "1":
+            if (state) {
+                selectedHotbar = 0;
+            }
+            break;
+        case "2":
+            if (state) {
+                selectedHotbar = 1;
+            }
+            break;
+        case "3":
+            if (state) {
+                selectedHotbar = 2;
+            }
+            break;
+        case "4":
+            if (state) {
+                selectedHotbar = 3;
+            }
+            break;
+        case "5":
+            if (state) {
+                selectedHotbar = 4;
+            }
+            break;
+        case "6":
+            if (state) {
+                selectedHotbar = 5;
+            }
+            break;
+        case "7":
+            if (state) {
+                selectedHotbar = 6;
+            }
+            break;
+        case "8":
+            if (state) {
+                selectedHotbar = 7;
+            }
+            break;
+        case "9":
+            if (state) {
+                selectedHotbar = 8;
             }
             break;
     }

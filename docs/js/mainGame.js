@@ -16,7 +16,11 @@ const gameLoop = async () => {
     previousTime = d.getTime();
     while (true) {    
         d = new Date();
-        if (!document.hasFocus()) {previousTime = d.getTime();}
+        if (document.hidden) {
+            await waitUntil(() => !document.hidden);
+            d = new Date();
+            previousTime = d.getTime();
+        }
         currentTime = d.getTime();
         time = currentTime;
         timeElapsed = currentTime - previousTime;
@@ -42,6 +46,5 @@ const gameLoop = async () => {
             deltaChecks--;
         }
         await sleep(1);
-        if (!document.hasFocus()) {previousTime = new Date().getTime();}
     }
 }
