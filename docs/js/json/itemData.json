@@ -8,34 +8,54 @@
         "id": 1,
         "name": "Iron Pickaxe",
         "image": "Item_1.png",
-        "stack": 1
+        "stack": 1,
+        "useTime": 20,
+        "toolSpeed": 13,
+        "pickaxePower": 40
     },
 
     "2": {
         "id": 2,
         "name": "Dirt Block",
         "image": "Item_2.png",
-        "stack": 9999
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 1
     },
 
     "3": {
         "id": 3,
         "name": "Stone Block",
         "image": "Item_3.png",
-        "stack": 9999
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 2
     },
 
     "11": {
         "id": 11,
         "name": "Iron Ore",
         "image": "Item_11.png",
-        "stack": 9999
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 4
     },
 
     "12": {
         "id": 12,
         "name": "Copper Ore",
         "image": "Item_12.png",
-        "stack": 9999
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 5
+    },
+
+    "30": {
+        "id": 30,
+        "name": "Dirt Wall",
+        "image": "Item_30.png",
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 7
     }
 }

@@ -25,15 +25,13 @@ let solid;
 function updatePlayerMain() {
     if (creative) {
         updateCreative();
-        moveCamera();
-        creativeEditTiles();
     } else {
         handleKeys_leftRight();
         handleKeys_jump();
         movePlayerX();
         movePlayerY();
-        moveCamera();
     }
+    moveCamera();
 } 
 
 function movePlayerX() {
@@ -217,22 +215,22 @@ function moveCamera() {
     cam.x = player.pos.x;
     cam.y = player.pos.y;
 
-    if (cam.x < viewspaceWidth/cam.zoom/2) {
-        cam.x = viewspaceWidth/cam.zoom/2;
+    if (cam.x < viewspaceWidth/cam.zoom/2 + worldBoarders*tilesheetSize) {
+        cam.x = viewspaceWidth/cam.zoom/2 + worldBoarders*tilesheetSize;
     }
-    if (cam.y < viewspaceHeight/cam.zoom/2) {
-        cam.y = viewspaceHeight/cam.zoom/2;
+    if (cam.y < viewspaceHeight/cam.zoom/2 + worldBoarders*tilesheetSize) {
+        cam.y = viewspaceHeight/cam.zoom/2 + worldBoarders*tilesheetSize;
     }
-    if (cam.x > (worldWidth * tilesheetSize) - viewspaceWidth/cam.zoom/2) {
-        cam.x = (worldWidth * tilesheetSize) - viewspaceWidth/cam.zoom/2;
+    if (cam.x > (worldWidth * tilesheetSize) - (viewspaceWidth/cam.zoom/2 + worldBoarders*tilesheetSize)) {
+        cam.x = (worldWidth * tilesheetSize) - (viewspaceWidth/cam.zoom/2 + worldBoarders*tilesheetSize);
     }
-    if (cam.y > (worldHeight * tilesheetSize) - viewspaceHeight/cam.zoom/2) {
-        cam.y = (worldHeight * tilesheetSize) - viewspaceHeight/cam.zoom/2;
+    if (cam.y > (worldHeight * tilesheetSize) - (viewspaceHeight/cam.zoom/2 + worldBoarders*tilesheetSize)) {
+        cam.y = (worldHeight * tilesheetSize) - (viewspaceHeight/cam.zoom/2 + worldBoarders*tilesheetSize);
     }
 }
 
 function resetPlayer() {
-    let y = worldHeight - 1;
+    let y = worldHeight - (worldBoarders+1);
 
     while (tileGrid[getIDX(worldWidth/2, y)] == 0 && y > 0) {
         y--;

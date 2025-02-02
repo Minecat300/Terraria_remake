@@ -7,7 +7,8 @@ const m = {
     m1: false,
     m2: false,
     m3: false,
-    m4: false
+    m4: false,
+    m5: false
 };
 let mainMenu = true;
 

@@ -72,7 +72,8 @@ const keyPress = {
     leftArrow: false,
     rightArrow: false,
     c: false,
-    shift: false
+    shift: false,
+    control: false
 }
 
 function updateKeyboard(event, state) {
@@ -109,6 +110,9 @@ function updateKeyboard(event, state) {
             break; 
         case "shift":
             keyPress.shift = state;
+            break;
+        case "control":
+            keyPress.control = state;
             break;
         case "b":
             if (state) {
@@ -369,7 +373,7 @@ function unpackSignedXY(value) {
 }
 
 function randomNumber(min, max) {
-    return Math.round(Math.random()*(max-min))+min;
+    return Math.min(Math.floor(Math.random()*(max-min+1))+min, max);
 }
 
 async function loadJSON(path) {
@@ -501,4 +505,30 @@ function drawRect(x, y, width, height, strokeSize, strokeColor, fillColor) {
     if (strokeSize > 0) {
         ctx.strokeRect(x, y, width, height);
     }
+}
+
+function isOnEdge(idx) {
+    let [x, y] = getXY(idx);
+    if (x < worldBoarders) {return true;}
+    if (x > worldWidth - (worldBoarders+1)) {return true;}
+    if (y < worldBoarders) {return true;}
+    if (y > worldHeight - (worldBoarders+1)) {return true;}
+    return false;
+}
+
+function pointTowards(tx, ty, fx, fy) {
+    const deltaX = tx - fx;
+    const deltaY = ty - fy;
+
+    if (deltaY == 0) {
+        if (deltaX < 0) {
+            return 270;
+        }
+        return 90;
+    }
+
+    if (deltaY < 0) {
+        return (540 + Math.atan(deltaX / deltaY)*180/Math.PI) % 360;
+    }
+    return (360 + Math.atan(deltaX / deltaY)*180/Math.PI) % 360;
 }

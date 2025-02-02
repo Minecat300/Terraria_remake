@@ -1,3 +1,4 @@
 function updateMain() {
     updatePlayerMain();
+    updateEditorTiles();
 }

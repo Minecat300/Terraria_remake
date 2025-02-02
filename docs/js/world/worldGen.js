@@ -15,6 +15,8 @@ let minGroundHeight;
 const maxGroundMove = 0.03;
 const groundChance = 10;
 
+const worldBoarders = 10;
+
 function getIDX(x, y) {
     return x + worldWidth * y;
 }
@@ -57,6 +59,7 @@ async function createWorld(width, height) {
     generateCaves();
     generateSky();
     generateGrass();
+    generateWorldBorders();
     await solveTileOffsets();
 }
 
@@ -249,6 +252,21 @@ async function solveTileOffsets() {
         solveTile(i, true, true, true);
         genData.currentSec++;
         updateGenBar(100);
+    }
+}
+
+function generateWorldBorders() {
+    for (let y = 0; y < worldHeight; y++) {
+        let slice = tileGrid.subarray(y*worldWidth, y*worldWidth + worldBoarders);
+        slice.fill(2);
+        slice = tileGrid.subarray((y+1)*worldWidth-(worldBoarders+1) + 1, (y+1)*worldWidth);
+        slice.fill(2);
+    }
+    for (let y = 0; y < worldBoarders; y++) {
+        let slice = tileGrid.subarray(y*worldWidth, (y+1)*worldWidth-1);
+        slice.fill(2);
+        slice = tileGrid.subarray((y + worldHeight - worldBoarders)*worldWidth, ((y+1 + worldHeight - worldBoarders))*worldWidth-1);
+        slice.fill(2);
     }
 }
 

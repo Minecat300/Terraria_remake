@@ -5,9 +5,9 @@ async function stitchImages(folderPath, fileExtention, fileName, start, end) {
         imagePaths.push(`${folderPath}/${fileName}${i}.${fileExtention}`);
     }
 
-    console.log("Generated image paths: ", imagePaths)
+    console.log("Generated image paths: ", imagePaths);
 
-    const images = await Promise.all(imagePaths.map(loadImage))
+    const images = await Promise.all(imagePaths.map(loadImage));
 
     const totalHeight = images.reduce((sum, img) => sum + img.height, 0);
     const maxWidth = Math.max(...images.map(img => img.width));
@@ -22,8 +22,8 @@ async function stitchImages(folderPath, fileExtention, fileName, start, end) {
     }
 
     const blob = await canvas.convertToBlob();
-    //download(blob, "tilesheet.png", "png")
-    const img = await createImageBitmap(blob)
+    //download(blob, "tilesheet.png", "png");
+    const img = await createImageBitmap(blob);
     return img;
 }
 
@@ -429,7 +429,7 @@ async function startGame() {
         tilesImg = img;
     }).catch(console.error);
 
-    await stitchImages("./images/wallSheets", "png", "Wall_", 1, 2).then((img) => {
+    await stitchImages("./images/wallSheets", "png", "Wall_", 1, 3).then((img) => {
         wallsImg = img;
     }).catch(console.error);
 
@@ -447,6 +447,7 @@ async function startGame() {
     );
 
     await loadItemImages();
+    loadSmartCursor();
 
     createImageBitmap(tilesImg).then((imageBitmap) => {
         tileWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData }, [imageBitmap]);

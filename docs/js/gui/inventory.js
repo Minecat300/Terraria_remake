@@ -1,4 +1,5 @@
 function drawInventory() {
+    uiOveride = false;
     if (inventoryOpen) {
         drawOpenInventory();
     } else {
@@ -88,6 +89,7 @@ function slotTick(x, y, currentSlot) {
     const dist = Math.sqrt(tx*tx + ty*ty);
 
     if (dist > 31*uiSize) {return;}
+    uiOveride = true;
     if (!mouseDown || !m.m1) {return;}
     if (cursorSlot.item().id == 0 && currentSlot.item().id == 0) {return;}
 
@@ -129,6 +131,8 @@ function slotTick(x, y, currentSlot) {
 }
 
 function giveItem(tItem, container) {
+    if (tItem.id == 0) {return;}
+    
     let amount = tItem.amount;
     if (container == "inventory") {
         amount = giveToExistingItem(amount, tItem, "hotbar");
@@ -146,6 +150,41 @@ function giveItem(tItem, container) {
         if (amount <= 0) {return;}
     }
     window.alert("your inventory is full. please make some space because in this version all items gets deleted when added to full inventory.")
+}
+
+function removeItemFromInventory(tItem) {
+    let amount = tItem.amount;
+    for (let i = 0; i < inventory["hotbar"].length; i++) {
+        const tmpSlot = new slot(i, "hotbar");
+        if (tmpSlot.item().id != tItem.id) {continue;}
+
+        if (tmpSlot.item().amount == amount) {
+            tmpSlot.set(new item(0, 0));
+            return true;
+        }
+        if (tmpSlot.item().amount < amount) {
+            tmpSlot.setAmount(tmpSlot.item().amount - amount);
+            return true;
+        }
+        amount -= tmpSlot.item().amount;
+        tmpSlot.set(new item(0, 0));
+    }
+    for (let i = 0; i < inventory["main"].length; i++) {
+        const tmpSlot = new slot(i, "main");
+        if (tmpSlot.item().id != tItem.id) {continue;}
+
+        if (tmpSlot.item().amount == amount) {
+            tmpSlot.set(new item(0, 0));
+            return true;
+        }
+        if (tmpSlot.item().amount < amount) {
+            tmpSlot.setAmount(tmpSlot.item().amount - amount);
+            return true;
+        }
+        amount -= tmpSlot.item().amount;
+        tmpSlot.set(new item(0, 0));
+    }
+    return false;
 }
 
 function giveItemToEmptySlot(amount, tItem, container) {
@@ -224,6 +263,8 @@ async function loadInventoryGuiImages() {
     inventoryGuiImages.slot1 = await loadImage('images/gui/Inventory_Back.png');
     inventoryGuiImages.slot2 = await loadImage('images/gui/Inventory_Back9.png');
     inventoryGuiImages.slot3 = await loadImage('images/gui/Inventory_Back14.png');
+    inventoryGuiImages.radial = await loadImage('images/gui/Radial.png');
+    inventoryGuiImages.selection = await loadImage('images/gui/selection.png');
 }
 
 async function loadItemImages() {
@@ -242,6 +283,8 @@ let inventoryGuiImages = {};
 let itemImages = {};
 
 let itemData;
+
+let uiOveride = false;
 
 loadInventoryGuiImages();
 

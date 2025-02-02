@@ -7,8 +7,8 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "none",
         "collisionState": "passThrough",
-        "wall": false,
-        "lightBlock": 5
+        "lightBlock": 5,
+        "replaceable": true
     },
 
     "1": {
@@ -19,8 +19,11 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false,
-        "lightBlock": 45
+        "lightBlock": 45,
+        "item": 2,
+        "breakType": 1,
+        "hardness": 50,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
     },
 
     "2": {
@@ -31,8 +34,11 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false,
-        "lightBlock": 45
+        "lightBlock": 45,
+        "item": 3,
+        "breakType": 1,
+        "hardness": 100,
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
     },
 
     "3": {
@@ -43,8 +49,11 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false,
-        "lightBlock": 45
+        "lightBlock": 45,
+        "item": 2,
+        "breakType": 1,
+        "hardness": "grass",
+        "sound": {"name": "Grass", "type": ".wav"}
     },
 
     "4": {
@@ -55,8 +64,11 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false,
-        "lightBlock": 45
+        "lightBlock": 45,
+        "item": 11,
+        "breakType": 1,
+        "hardness": 100,
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
     },
 
     "5": {
@@ -67,19 +79,40 @@
         "tileAssetSize": {"width": 16, "height": 16},
         "tileSolver": "default",
         "collisionState": "solid",
-        "wall": false,
-        "lightBlock": 45
+        "lightBlock": 45,
+        "item": 12,
+        "breakType": 1,
+        "hardness": 100,
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
     },
 
     "6": {
         "id": 6,
-        "name": "Dirt Wall",
+        "name": "Unsafe Dirt Wall",
         "startIDX": {"x": 0, "y": 5},
         "endIDX": {"x": 12, "y": 9},
         "tileAssetSize": {"width": 32, "height": 32},
         "tileSolver": "default",
-        "collisionState": "none",
         "wall": true,
-        "lightBlock": 8
+        "lightBlock": 8,
+        "item": 30,
+        "breakType": 3,
+        "hardness": 50,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+    },
+
+    "7": {
+        "id": 7,
+        "name": "Dirt Wall",
+        "startIDX": {"x": 0, "y": 10},
+        "endIDX": {"x": 12, "y": 14},
+        "tileAssetSize": {"width": 32, "height": 32},
+        "tileSolver": "default",
+        "wall": true,
+        "lightBlock": 8,
+        "item": 30,
+        "breakType": 3,
+        "hardness": 50,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
     }
 }

@@ -45,7 +45,7 @@ async function generateSkyLight() {
     updateGenBar(1, true);
 
     for (let x = 1; x < _LworldWidth - 2; x++) {
-        skyLightGrid[1+x + _LworldWidth*(_LworldHeight-1)] = 200;
+        skyLightGrid[1+x + _LworldWidth*(_LworldHeight-11)] = 200;
     }
 
     for (let y = 2; y < _LworldHeight/2 - 1; y++) {
@@ -179,6 +179,7 @@ function updateSingleSkyLight(idx) {
 
 function checkSkyLight(idx) {
     if (lucIdx.includes(idx)) {return;}
+    if (isOnEdge(idx)) {return;}
 
     let currentLumens = Math.max(
         getSkyLightAfterBlock(idx + worldWidth),
