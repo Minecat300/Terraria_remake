@@ -338,6 +338,21 @@ function drawTileFrame() {
     }
 }
 
+function drawBuildOverlay() {
+    if (!buildGuide.active) {return;}
+    const move = new moveMatrix(((buildGuide.x + 0.5)*16 - cam.x)*cam.zoom + viewspaceWidth/2, viewspaceHeight/2 - ((buildGuide.y + 0.5)*16 - cam.y)*cam.zoom, undefined, undefined);
+
+    if (smartCursor) {
+        move.setSize(inventoryGuiImages.selection.width*cam.zoom/2, undefined);
+        drawAdvImage(ctx, inventoryGuiImages.selection, move);
+    } else {
+        move.setSize(inventoryGuiImages.radial.width*cam.zoom, undefined);
+        ctx.filter = 'opacity(50%)';
+        drawAdvImage(ctx, inventoryGuiImages.radial, move);
+        ctx.filter = 'none'; 
+    }
+}
+
 function updateChunk(x, y) {
     requestChunk(wallWorker, wallGrid, offsetWallGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
     requestChunk(tileWorker, tileGrid, offsetTileGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
@@ -471,6 +486,7 @@ function renderMain() {
     ctx.imageSmoothingEnabled = false;
     drawTileFrame();
     drawPlayer();
+    drawBuildOverlay();
     drawInventory();
     drawAsp();
 }

@@ -246,6 +246,11 @@ class moveMatrix {
         this.width = width;
         this.height = height;
     }
+
+    setSize(width, height) {
+        this.width = width;
+        this.height = height;
+    }
 }
 
 class rotationMatrix {

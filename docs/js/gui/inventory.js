@@ -34,7 +34,11 @@ function drawClosedInventory() {
         drawItem(tx, ty, inventory.hotbar[x], 1 + (selectedHotbar == x)*0.15384615385);
         drawOnlyText([x+1].toString().at([x+1].toString().length-1), tx - uiSize*21, ty - uiSize*14, uiSize*20*(1 + (selectedHotbar == x)*0.15384615385), "left", "lightgray", "black");
     }
-    drawItem(mouseX + uiSize*30, mouseY + uiSize*30, selectedSlot.item(), 1);
+    if (buildGuide.active) {
+        const tx = uiSize*10 + itemImages[selectedSlot.item().id].width*0.65*uiSize;
+        const ty = uiSize*10 + itemImages[selectedSlot.item().id].height*0.65*uiSize;
+        drawItem(mouseX - tx, mouseY + ty, new item(selectedSlot.item().id, 1), 1);
+    }
 }
 
 function drawOpenInventory() {

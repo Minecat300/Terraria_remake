@@ -1,13 +1,16 @@
 let brush = 0;
-let smartCursor = {};
+let smartCursor = false;
 let buildDelay = 0;
 let tileBreak = {};
+let buildGuide = {x: 0, y: 0, active: false};
+
 const defaultInteractionRange = {
     building: {width: 5, height: 5},
     breaking: {width: 4, height: 4}
 }
 
 function updateEditorTiles() {
+    buildGuide.active = false;
     if (uiOveride) {return;}
     if (creative) {
         creativeEditTiles();
@@ -28,7 +31,7 @@ function editTiles() {
 
     if (keyPress.control && m.m5) {
         m.m5 = false;
-        smartCursor[tool.id] = !(smartCursor?.[tool.id] ?? false);
+        smartCursor = !smartCursor;
     }
 
     const tx = (mouseX - viewspaceWidth/2)/cam.zoom + cam.x;
@@ -46,7 +49,7 @@ function editTiles() {
         range = defaultInteractionRange.breaking;
     }
 
-    if (smartCursor?.[tool.id] ?? false) {
+    if (smartCursor && brush == 0) {
         let check;
         [tileX, tileY, check] = getClosestTile(brush, tool, range, 90, 10);
         if (!check) {return;}
@@ -54,9 +57,11 @@ function editTiles() {
         index = getIDX(tileX, tileY);
     } else {
         if (capSize(tileX * tilesheetSize, tileY * tilesheetSize, range)) {return;}
+        buildGuide = {x: tileX, y: tileY, active: true};
         if (!canTransformTile(index, brush, tool)) {return;}
-        //drawAdvImage(ctx, inventoryGuiImages.radial, new moveMatrix((tileX*16 - cam.x)*cam.zoom, viewspaceHeight - (tileY*16 - cam.y)*cam.zoom, inventoryGuiImages.radial.width*cam.zoom, undefined));
     }
+    buildGuide = {x: tileX, y: tileY, active: true};
+
     if (buildDelay >= 1) {
         buildDelay--;
     }
@@ -103,7 +108,7 @@ function useBreakingTool(idx) {
 function useBuildingBlock() {
     const tool = selectedSlot.item();
     if (buildDelay < 1) {
-        buildDelay = itemData[tool.id]?.useTime ?? 15;
+        buildDelay = 5;
         playTileSound({name: "Dig_", type: ".wav", amount: {start: 0, end: 2}});
         selectedSlot.setAmount(selectedSlot.item().amount - 1);
         if (selectedSlot.item().amount == 0) {
