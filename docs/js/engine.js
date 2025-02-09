@@ -195,7 +195,7 @@ function getAsp(img) {return img.width / img.height;}
 function stampImage
     (
     c, img, x, y, width, height = width/getAsp(img),
-    rotate = 0, cx = 0, cy = 0,
+    rotate = 0, cx = 0.5, cy = 0.5,
     cropX = 0, cropY = 0, cropWidth = 1, cropHeight = 1,
     overrideRotate = false
     )
@@ -212,6 +212,11 @@ function stampImage
 
     rotate = rotate % 360;
     rotate *= Math.PI/180;
+
+    cx -= 0.5;
+    cy -= 0.5;
+    cx *= width;
+    cy *= height;
    
     if (rotate === 0 && !overrideRotate) {
         //c.filter = effects;
@@ -224,8 +229,7 @@ function stampImage
     } else {
         c.save();
         c.translate(x, y);
-        c.translate(cx, cy);
-        c.rotate(rotate);
+        c.rotate(-rotate);
         c.translate(-cx, -cy);
         c.scale(width/img.width, height/img.height);
         //c.filter = effects;
@@ -270,7 +274,7 @@ class cropMatrix {
     }
 }
 
-function drawAdvImage(c, img, MM, RM = new rotationMatrix(0, 0, 0), CM = new cropMatrix(0, 0, 1, 1), overrideRotate) {
+function drawAdvImage(c, img, MM, RM = new rotationMatrix(0, 0.5, 0.5), CM = new cropMatrix(0, 0, 1, 1), overrideRotate) {
     let x = MM.x;
     let y = MM.y;
     let width = MM.width;
@@ -286,9 +290,6 @@ function drawAdvImage(c, img, MM, RM = new rotationMatrix(0, 0, 0), CM = new cro
     if (height != undefined) {
         height = height/viewspaceHeight*screenHeight;
     }
-
-    cx = cx/viewspaceWidth*screenWidth;
-    cy = cy/viewspaceHeight*screenHeight;
 
     stampImage(c, img, x, y, width, height, RM.rotate, cx, cy, CM.cropX, CM.cropY, CM.cropWidth, CM.cropHeight, overrideRotate);
 }

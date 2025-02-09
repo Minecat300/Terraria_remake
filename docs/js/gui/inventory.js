@@ -15,6 +15,7 @@ function drawClosedInventory() {
 
     selectedSlot.id = selectedHotbar;
     selectedSlot.container = "hotbar";
+    updateSelectedSlot();
 
     for (let x = 0; x < inventory.hotbar.length; x++) {
         let tx = x*uiSize*72 + 55*uiSize;
@@ -35,6 +36,7 @@ function drawClosedInventory() {
         drawOnlyText([x+1].toString().at([x+1].toString().length-1), tx - uiSize*21, ty - uiSize*14, uiSize*20*(1 + (selectedHotbar == x)*0.15384615385), "left", "lightgray", "black");
     }
     if (buildGuide.active) {
+        if (selectedSlot.item().id == 0) {return;}
         const tx = uiSize*10 + itemImages[selectedSlot.item().id].width*0.65*uiSize;
         const ty = uiSize*10 + itemImages[selectedSlot.item().id].height*0.65*uiSize;
         drawItem(mouseX - tx, mouseY + ty, new item(selectedSlot.item().id, 1), 1);
@@ -49,6 +51,7 @@ function drawOpenInventory() {
         selectedSlot.id = selectedHotbar;
         selectedSlot.container = "hotbar";
     }
+    updateSelectedSlot();
 
     for (let x = 0; x < inventory.hotbar.length; x++) {
         const tx = x*uiSize*72 + 55*uiSize;
@@ -225,6 +228,13 @@ function giveToExistingItem(amount, tItem, container) {
     return amount;
 }
 
+function updateSelectedSlot() {
+    if (!selectedSlot.compare(oldSelectedSlot)) {
+        oldSelectedSlot = selectedSlot.copy();
+        buildAni.delay = 0;
+    }
+}
+
 class item {
     constructor(id, amount) {
         this.id = id;
@@ -260,6 +270,15 @@ class slot {
 
     item() {
         return inventory[this.container][this.id];
+    }
+
+    compare(tSlot) {
+        if (tSlot.id == this.id && tSlot.container == this.container) {return true;}
+        return false;
+    }
+
+    copy() {
+        return new slot(this.id, this.container);
     }
 }
 
@@ -304,6 +323,7 @@ for (key in inventory) {
 
 let selectedHotbar = 0;
 let selectedSlot = new slot(selectedHotbar, "hotbar");
+let oldSelectedSlot = selectedSlot.copy();
 
 const cursorSlot = new slot(0, "cursor");
 

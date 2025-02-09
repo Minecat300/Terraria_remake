@@ -411,6 +411,8 @@ let usedKeys;
 let playerImages = {};
 let playerLoadedAssets = {};
 
+let unknownImage;
+
 const chunkSize = {
     width: 32,
     height: 18,
@@ -460,6 +462,8 @@ async function startGame() {
         {h: 78, s: 40, l: 145},
         {h: 78, s: 40, l: 145}
     );
+
+    unknownImage = await loadImage("images/unknown.png");
 
     await loadItemImages();
     loadSmartCursor();

@@ -12,8 +12,11 @@ const player = {
     falling: 99,
     jumping: 99,
     dir: 1,
-    frame: 0
+    frame: 0,
+    handAnimation: -1
 }
+
+let buildAni = {delay: 0, maxDelay: 0};
 
 let creative = false;
 
@@ -240,6 +243,12 @@ function resetPlayer() {
 }
 
 function drawPlayer() {
+    if (buildAni.delay != 0) {
+        player.handAnimation = (1-buildAni.delay/buildAni.maxDelay)*3;
+        buildAni.delay--;
+    } else {
+        player.handAnimation = -1;
+    }
 
     const light = getLight(getIDX(getGridPos(player.pos.x), getGridPos(player.pos.y)), {dayNight: dayNight});
 
@@ -281,18 +290,28 @@ function drawPlayer() {
         arms.y = 1;
         legsTime = 0;
     }
+    if (player.handAnimation >= 0) {
+        const tmpAni = Math.floor(player.handAnimation) % 4;
+        arms.x = tmpAni + 3;
+        arms.y = 0;
+    }
 
     drawCharacter(
         "default",
         viewspaceWidth/2 + (player.pos.x - cam.x)*cam.zoom, viewspaceHeight/2 + (cam.y - player.pos.y - 2)*cam.zoom, cam.zoom, player.dir,
         helmet, chestplate, greaves,
         {x: Number(player.falling > 1), y: 0}, arms, legsTime + 6, legs, legsTime, bodyTime,
-        100 - Math.min(100, light/120*100)
+        100 - Math.min(100, light/120*100),
+        player.handAnimation, selectedSlot.item()
     );
-
 }
 
-function drawCharacter(playerAssets, x, y, scale, dir, helmet, chestplate, greaves, bodyState, armState, headState, legsState, hairState, bodyOffsetY, light) {
+function drawCharacter(
+    playerAssets, x, y, scale, dir,
+    helmet, chestplate, greaves,
+    bodyState, armState, headState, legsState, hairState, bodyOffsetY,
+    light, handAnimation, item
+    ) {
     playerAssets = playerLoadedAssets[playerAssets];
 
     if (chestplate === undefined) {
@@ -319,12 +338,61 @@ function drawCharacter(playerAssets, x, y, scale, dir, helmet, chestplate, greav
     } else {
         drawBodypart(playerImages[helmet], x, y, scale, dir, 0, headState, light);
     }
+    if (handAnimation >= 0) {
+        drawHeldItem(x, y, item, handAnimation, scale, light, dir);
+    }
     if (chestplate === undefined) {
         drawBodypart(playerAssets.arms, x, y, scale, dir, armState.x, armState.y, light, bodyOffsetY);
         drawBodypart(playerAssets.hands, x, y, scale, dir, armState.x, armState.y, light, bodyOffsetY);
     } else {
         drawBodypart(playerImages[chestplate], x, y, scale, dir, armState.x, armState.y, light, bodyOffsetY);
     }
+}
+
+function drawHeldItem(x, y, item, handAnimation, scale, light, dir) {
+    const img = itemImages?.[item.id] ?? unknownImage;
+    const offsets = itemData[item.id]?.handAnimationOffset ?? {dir: 0, x: 0.5, y: 0.5};
+
+    let tx = 0;
+    let ty = 0;
+    let angle = offsets.dir*dir;
+
+    switch (Math.floor(handAnimation) % 4) {
+        case 0:
+            tx = -9;
+            ty = -6;
+            break;
+        case 1:
+            tx = 5;
+            ty = -5;
+            break;
+        case 2:
+            tx = 7;
+            ty = 8;
+            break;
+        case 3:
+            tx = 5;
+            ty = 12;
+            break;
+    }
+
+    const toolType = itemData[item.id]?.handAnimationType ?? "default";
+
+    if (toolType == "tool") {
+        angle -= (handAnimation*60-50)*dir;
+    }
+    if (toolType == "default") {
+        angle -= (handAnimation*20)*dir;
+    }
+
+    const move = new moveMatrix(tx*scale*dir + x, ty*scale + y, img.width*scale*dir, img.height*scale);
+    const rotate = new rotationMatrix(angle, offsets.x, offsets.y);
+
+    drawAdvImage(ctx, img, move, rotate, undefined, true);
+    if (light == 0 || xray) {return;}
+    ctx.filter = `brightness(0%) opacity(${light}%)`;
+    drawAdvImage(ctx, img, move, rotate, undefined, true);
+    ctx.filter = 'none';
 }
 
 function drawBodypart(img, x, y, scale, dir, cx, cy, light, pixleOffsetY = 0) {

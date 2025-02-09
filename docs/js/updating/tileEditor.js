@@ -57,17 +57,26 @@ function editTiles() {
         index = getIDX(tileX, tileY);
     } else {
         if (capSize(tileX * tilesheetSize, tileY * tilesheetSize, range)) {return;}
-        buildGuide = {x: tileX, y: tileY, active: true};
+        buildGuide.active = true;
+        buildGuide.x = tileX;
+        buildGuide.y = tileY;
         if (!canTransformTile(index, brush, tool)) {return;}
     }
-    buildGuide = {x: tileX, y: tileY, active: true};
+    buildGuide.active = true;
+    buildGuide.x = tileX;
+    buildGuide.y = tileY;
 
     if (buildDelay >= 1) {
         buildDelay--;
     }
 
     if (!mouseDown) {return;}
-    
+
+    if (player.handAnimation < 0) {
+        player.handAnimation = 0;
+    }
+
+
     if (brush == 0) {
         if (!useBreakingTool(index)) {return;}
     } else {
@@ -86,6 +95,11 @@ function useBreakingTool(idx) {
         toolPower = itemData[tool.id].pickaxePower;
     }
     if (buildDelay < 1) {
+        if (buildAni.delay == 0) {
+            buildAni.maxDelay = itemData[tool.id]?.useTime ?? 15;
+            buildAni.delay = itemData[tool.id]?.useTime ?? 15;
+        }
+        
         buildDelay = itemData[tool.id]?.toolSpeed ?? 0;
         if (hardness == "grass") {
             adaptivePlaceTile(1, idx);
@@ -108,6 +122,11 @@ function useBreakingTool(idx) {
 function useBuildingBlock() {
     const tool = selectedSlot.item();
     if (buildDelay < 1) {
+        if (buildAni.delay == 0) {
+            buildAni.maxDelay = itemData[item.id]?.useTime ?? 15;
+            buildAni.delay = itemData[item.id]?.useTime ?? 15;
+        }
+
         buildDelay = 5;
         playTileSound({name: "Dig_", type: ".wav", amount: {start: 0, end: 2}});
         selectedSlot.setAmount(selectedSlot.item().amount - 1);
