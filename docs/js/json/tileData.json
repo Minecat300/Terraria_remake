@@ -14,6 +14,7 @@
     "1": {
         "id": 1,
         "name": "Dirt",
+        "imageSheet": ["Tiles_0.png"],
         "startIDX": {"x": 0, "y": 0},
         "endIDX": {"x": 15, "y": 14},
         "tileAssetSize": {"width": 16, "height": 16},
@@ -29,10 +30,17 @@
     "2": {
         "id": 2,
         "name": "Stone",
-        "startIDX": {"x": 0, "y": 15},
-        "endIDX": {"x": 15, "y": 29},
+        "imageSheet": ["Tiles_1.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 15, "y": 14},
         "tileAssetSize": {"width": 16, "height": 16},
-        "tileSolver": "default",
+        "tileSolver": "adv_default",
+        "tileSolverMetadata": {
+            "1": [{"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}],
+            "2": [{"type": "id", "data": [2]}],
+            "3": [{"type": "id", "data": [2]}, {"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid", "reversed": true}]
+        },
+        "tileSolverFallback": "default",
         "collisionState": "solid",
         "lightBlock": 45,
         "item": 3,
@@ -44,10 +52,17 @@
     "3": {
         "id": 3,
         "name": "Grass",
-        "startIDX": {"x": 0, "y": 30},
-        "endIDX": {"x": 15, "y": 51},
+        "imageSheet": ["Tiles_2.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 15, "y": 21},
         "tileAssetSize": {"width": 16, "height": 16},
-        "tileSolver": "default",
+        "tileSolver": "adv_grass",
+        "tileSolverMetadata": {
+            "1": [{"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}],
+            "2": [{"type": "id", "data": [3]}],
+            "3": [{"type": "id", "data": [3]}, {"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid", "reversed": true}]
+        },
+        "tileSolverFallback": "default",
         "collisionState": "solid",
         "lightBlock": 45,
         "item": 2,
@@ -59,10 +74,17 @@
     "4": {
         "id": 4,
         "name": "Iron Ore",
-        "startIDX": {"x": 0, "y": 52},
-        "endIDX": {"x": 15, "y": 66},
+        "imageSheet": ["Tiles_6.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 15, "y": 14},
         "tileAssetSize": {"width": 16, "height": 16},
-        "tileSolver": "default",
+        "tileSolver": "adv_default",
+        "tileSolverMetadata": {
+            "1": [{"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}],
+            "2": [{"type": "id", "data": [4]}],
+            "3": [{"type": "id", "data": [4]}, {"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid", "reversed": true}]
+        },
+        "tileSolverFallback": "default",
         "collisionState": "solid",
         "lightBlock": 45,
         "item": 11,
@@ -74,10 +96,17 @@
     "5": {
         "id": 5,
         "name": "Copper Ore",
-        "startIDX": {"x": 0, "y": 67},
-        "endIDX": {"x": 15, "y": 81},
+        "imageSheet": ["Tiles_7.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 15, "y": 14},
         "tileAssetSize": {"width": 16, "height": 16},
-        "tileSolver": "default",
+        "tileSolver": "adv_default",
+        "tileSolverMetadata": {
+            "1": [{"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}],
+            "2": [{"type": "id", "data": [5]}],
+            "3": [{"type": "id", "data": [5]}, {"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid", "reversed": true}]
+        },
+        "tileSolverFallback": "default",
         "collisionState": "solid",
         "lightBlock": 45,
         "item": 12,
@@ -89,8 +118,9 @@
     "6": {
         "id": 6,
         "name": "Unsafe Dirt Wall",
-        "startIDX": {"x": 0, "y": 5},
-        "endIDX": {"x": 12, "y": 9},
+        "imageSheet": ["Wall_2.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 12, "y": 4},
         "tileAssetSize": {"width": 32, "height": 32},
         "tileSolver": "default",
         "wall": true,
@@ -104,8 +134,9 @@
     "7": {
         "id": 7,
         "name": "Dirt Wall",
-        "startIDX": {"x": 0, "y": 10},
-        "endIDX": {"x": 12, "y": 14},
+        "imageSheet": ["Wall_16.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 12, "y": 4},
         "tileAssetSize": {"width": 32, "height": 32},
         "tileSolver": "default",
         "wall": true,
@@ -114,5 +145,82 @@
         "breakType": 3,
         "hardness": 50,
         "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+    },
+
+    "8": {
+        "id": 8,
+        "name": "Main Forest Tree Stem",
+        "imageSheet": ["Tiles_5.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 7, "y": 11},
+        "tileAssetSize": {"width": 20, "height": 20, "offsetX": 0, "offsetY": 2},
+        "tileSolver": "adv_treesMain",
+        "tileSolverMetadata": {
+            "1": [{"type": "custom", "cType": "tree", "cDefault": false, "data": true}],
+            "2": [{"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}]
+        },
+        "collisionState": "passThrough",
+        "lightBlock": 15,
+        "item": null,
+        "breakType": 2,
+        "underBreak": "no",
+        "hardness": 500,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "tree": true
+    },
+
+    "9": {
+        "id": 9,
+        "name": "Sec Forest Tree Stem",
+        "imageSheet": ["Tiles_5.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 7, "y": 11},
+        "tileAssetSize": {"width": 20, "height": 20, "offsetX": 0, "offsetY": 2},
+        "tileSolver": "adv_treesSec",
+        "tileSolverMetadata": {
+            "1": [{"type": "custom", "cType": "tree", "cDefault": false, "data": true}],
+            "2": [{"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}]
+        },
+        "collisionState": "passThrough",
+        "lightBlock": 15,
+        "item": null,
+        "breakType": 2,
+        "underBreak": "no",
+        "hardness": 500,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "tree": true,
+        "treeType": "sec"
+    },
+
+    "10": {
+        "id": 10,
+        "name": "Forest Tree Top",
+        "imageSheet": ["tree/Tree_Tops_0.png", "tree/Tree_Tops_6.png", "tree/Tree_Tops_7.png", "tree/Tree_Tops_8.png", "tree/Tree_Tops_9.png", "tree/Tree_Tops_10.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 2, "y": 5},
+        "tileAssetSize": {"width": 80, "height": 80, "offsetX": 0, "offsetY": -32},
+        "tileSolver": "none",
+        "collisionState": "passThrough",
+        "lightBlock": 0,
+        "item": null,
+        "breakType": 0,
+        "tree": true,
+        "treeType": "top"
+    },
+
+    "11": {
+        "id": 11,
+        "name": "Forest Tree Branch",
+        "imageSheet": ["tree/Tree_Branches_0.png", "tree/Tree_Branches_6.png", "tree/Tree_Branches_7.png", "tree/Tree_Branches_8.png", "tree/Tree_Branches_9.png", "tree/Tree_Branches_10.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 1, "y": 17},
+        "tileAssetSize": {"width": 40, "height": 40, "offsetX": -12, "offsetY": 0},
+        "tileSolver": "none",
+        "collisionState": "passThrough",
+        "lightBlock": 0,
+        "item": null,
+        "breakType": 0,
+        "tree": true,
+        "treeType": "branch"
     }
 }

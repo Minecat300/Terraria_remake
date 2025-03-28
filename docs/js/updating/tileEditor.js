@@ -198,6 +198,8 @@ function canBreakBlock(idx, tool, auto) {
     if ((tileData[tileGrid[idx]]?.breakType ?? 0) == 0) {return false;}
     if ((itemData[tool.id]?.pickaxePower ?? 0) != 0) {
         if ((tileData[tileGrid[idx]]?.breakType ?? 0) != 1) {return false;}
+        const underBreak = tileData[tileGrid[idx+worldWidth]]?.underBreak ?? "yes";
+        if (underBreak == "no") {return false;}
     }
     return true;
 }
@@ -277,8 +279,10 @@ function adaptivePlaceTile(tile, idx, wall = false) {
     updateSkyLight(idx);
 }
 
-function breakBlock(idx, wall = false) {
+function breakBlock(idx, wall = false, secoundaryUpdates = true) {
     if (isOnEdge(idx)) {return;}
+
+    const prevTile = tileGrid[idx];
 
     let itemId;
     if (wall) {
@@ -294,6 +298,46 @@ function breakBlock(idx, wall = false) {
     updateTileSolving(idx, wall);
     requestChunkUpdate(idx);
     updateSkyLight(idx);
+
+    if (secoundaryUpdates) {
+        updateTreeBreak(idx, prevTile);
+    }
+}
+
+function updateTreeBreak(idx, tile) {
+    if (!(tileData[tile]?.tree ?? false)) {return;}
+    if ((tileData[tile]?.treeType ?? "none") == "sec") {return;}
+    if ((tileData[tileGrid[idx+worldWidth]]?.treeType ?? "none") == "top") {
+        tileGrid[idx + worldWidth*1 + 2] = 0;
+        tileGrid[idx + worldWidth*1 - 2] = 0;
+        tileGrid[idx + worldWidth*5 + 2] = 0;
+        tileGrid[idx + worldWidth*5 - 2] = 0;
+        requestChunkUpdate(idx + worldWidth*1 + 2);
+        requestChunkUpdate(idx + worldWidth*1 - 2);
+        requestChunkUpdate(idx + worldWidth*5 + 2);
+        requestChunkUpdate(idx + worldWidth*5 - 2);
+    }
+    if ((tileData[tileGrid[idx-1]]?.treeType ?? "none") == "branch") {
+        tileGrid[idx + worldWidth*1 - 2] = 0;
+        tileGrid[idx - worldWidth*1 - 2] = 0;
+        requestChunkUpdate(idx + worldWidth*1 - 2);
+        requestChunkUpdate(idx - worldWidth*1 - 2);
+    }
+    if ((tileData[tileGrid[idx+1]]?.treeType ?? "none") == "branch") {
+        tileGrid[idx + worldWidth*1 + 2] = 0;
+        tileGrid[idx - worldWidth*1 + 2] = 0;
+        requestChunkUpdate(idx + worldWidth*1 + 2);
+        requestChunkUpdate(idx - worldWidth*1 + 2);
+    }
+    if (tileData[tileGrid[idx-1]]?.tree ?? false) {
+        breakBlock(idx-1, false, false);
+    }
+    if (tileData[tileGrid[idx+1]]?.tree ?? false) {
+        breakBlock(idx+1, false, false);
+    }
+    if (tileData[tileGrid[idx+worldWidth]]?.tree ?? false) {
+        breakBlock(idx+worldWidth);
+    }
 }
 
 function updateTileSolving(idx, wall = false) {
@@ -302,11 +346,19 @@ function updateTileSolving(idx, wall = false) {
     solveTile(idx + 1, false, false, wall);
     solveTile(idx - worldWidth, false, false, wall);
     solveTile(idx - 1, false, false, wall);
+    solveTile(idx + worldWidth + 1, false, false, wall);
+    solveTile(idx - worldWidth + 1, false, false, wall);
+    solveTile(idx + worldWidth - 1, false, false, wall);
+    solveTile(idx - worldWidth - 1, false, false, wall);
     requestChunkUpdate(idx);
     requestChunkUpdate(idx + worldWidth);
     requestChunkUpdate(idx + 1);
     requestChunkUpdate(idx - worldWidth);
     requestChunkUpdate(idx - 1);
+    requestChunkUpdate(idx + worldWidth + 1);
+    requestChunkUpdate(idx - worldWidth + 1);
+    requestChunkUpdate(idx + worldWidth - 1);
+    requestChunkUpdate(idx - worldWidth - 1);
 }
 
 function loadSmartCursor() {

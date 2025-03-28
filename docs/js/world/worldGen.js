@@ -21,6 +21,10 @@ function getIDX(x, y) {
     return x + worldWidth * y;
 }
 
+function sin(r) {
+    return Math.sin(r*Math.PI/180);
+}
+
 let genData = {
     tag: "",
     maxMain: 0,
@@ -31,7 +35,7 @@ let genData = {
 
 async function createWorld(width, height) {
     genData.tag = "Setting Up";
-    genData.maxMain = 8;
+    genData.maxMain = 9;
     genData.currentMain = 0;
     genData.maxSec = 0;
     genData.currentSec = 0;
@@ -59,6 +63,7 @@ async function createWorld(width, height) {
     generateCaves();
     generateSky();
     generateGrass();
+    generateTrees();
     generateWorldBorders();
     await solveTileOffsets();
 }
@@ -152,8 +157,14 @@ function generateGrass() {
         while (tileGrid[getIDX(x, y)] == 0 && y >= 0) {
             y--
         }
-        if (tileGrid[getIDX(x, y)] == 1) {
+        if (tileGrid[getIDX(x, y)] == 1 || tileGrid[getIDX(x, y)] == 3) {
             tileGrid[getIDX(x, y)] = 3;
+            if (tileGrid[getIDX(x+1, y)] == 1) {
+                tileGrid[getIDX(x+1, y)] = 3;
+            }
+            if (tileGrid[getIDX(x-1, y)] == 1) {
+                tileGrid[getIDX(x-1, y)] = 3;
+            }
         }
         genData.currentSec++;
         updateGenBar(10);
@@ -174,7 +185,7 @@ function generateStoneAndDirtVerity() {
 }
 
 function makeDirtInStone(amount, maxLength){
-    for(let i = 0; i < amount; i++) {
+    for (let i = 0; i < amount; i++) {
         makeSlither(randomNumber(0, worldWidth), randomNumber(0, worldGTCH), randomNumber(2, 5), 1, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
         genData.currentSec++;
         updateGenBar(10);
@@ -182,7 +193,7 @@ function makeDirtInStone(amount, maxLength){
 }
 
 function makeStoneInDirt(amount, maxLength, maxHeight, maxSize) {
-    for(let i = 0; i < amount; i++) {
+    for (let i = 0; i < amount; i++) {
         makeSlither(randomNumber(0, worldWidth), randomNumber(worldGTCH, randomNumber(worldGTCH, maxHeight)), randomNumber(2, maxSize), 2, undefined, 5, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
         genData.currentSec++;
         updateGenBar(10);
@@ -201,9 +212,9 @@ function generateCaves() {
 }
 
 function placeCave(amount, maxLength, maxSize, extended) {
-    for(let i = 0; i < amount; i++) {
+    for (let i = 0; i < amount; i++) {
         makeSlither(randomNumber(0, worldWidth), randomNumber(0, worldGTCH + Math.floor((worldHeight - worldGTCH)/2)), randomNumber(2, maxSize), 0, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.1, true), randomNumber(0.1, 1, true));
-        for(let i2 = 0; i2 < randomNumber(0, extended); i2++) {
+        for (let i2 = 0; i2 < randomNumber(0, extended); i2++) {
             makeSlither(undefined, undefined, randomNumber(2, maxSize), 0, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.1, true), randomNumber(0.1, 1, true));
         }
         genData.currentSec++;
@@ -222,11 +233,140 @@ function generateOres() {
 }
 
 function placeOre(tile, size, amount, min, max, mid) {
-    for(let i = 0; i < amount; i++) {
+    for (let i = 0; i < amount; i++) {
         makeSlither(randomNumber(0, worldWidth), randomNumber(min, randomNumber(mid, max)), randomNumber(1, randomNumber(1, size)), tile, undefined, 5, randomNumber(5, 15), randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
         genData.currentSec++;
         updateGenBar(10);
     }
+}
+
+function generateTrees() {
+    genData.tag = "Adding Trees";
+    genData.maxSec = worldWidth;
+    genData.currentSec = 0;
+    generateAllTreesOfType(8, 9, 10, 11, 3, 3, randomNumber(0, 5));
+    genData.currentMain++;
+}
+
+function generateAllTreesOfType(mainStemId, secStemId, topId, branchId, underBlock, varityLength, varity) {
+    const random = randomNumber(0, 100);
+    for (let x = 0; x < worldWidth; x++) {
+        let y = worldHeight-(1+worldBoarders)
+        while (y > 1 && (tileData[tileGrid[getIDX(x, y)]]?.replaceable ?? false)) {
+            y--;
+        }
+        if (tileGrid[getIDX(x, y)] != underBlock) {continue;}
+        if (wallGrid[getIDX(x, y+1)] != 0) {continue;}
+
+        const height = randomNumber(4, randomNumber(6, 20));
+        if (!checkIfCanPlaceTree(getIDX(x, y+1), height)) {continue;}
+
+        const rand = randomNumber(1, Math.ceil(25*sin(57.2957549575*sin(57.2957549575*(1+sin(57.2957549575*0.1*(x+random)))))));
+        if (rand == 1) {
+            placeTree(mainStemId, secStemId, topId, branchId, getIDX(x, y+1), height, underBlock, varityLength, varity);
+        }
+        genData.currentSec++;
+        updateGenBar(10);
+    }
+}
+
+function checkIfCanPlaceTree(idx, height) {
+    if (!(tileData[tileGrid[idx+1]]?.replaceable ?? false)) {return false;}
+    if (!(tileData[tileGrid[idx]]?.replaceable ?? false)) {return false;}
+    if (!(tileData[tileGrid[idx-1]]?.replaceable ?? false)) {return false;}
+
+    for (let x = 0; x < 5; x++) {
+        for (let y = 0; y < height+4; y++) {
+            if (!(tileData[tileGrid[idx+getIDX(x-3,y+1)]]?.replaceable ?? false)) {return false;}
+        }
+    }
+
+    return true;
+}
+
+function placeTree(mainStemId, secStemId, topId, branchId, idx, height, underBlock, varityLength, varity) {
+    placeTile(idx, mainStemId);
+    if (tileGrid[idx-worldWidth+1] == underBlock) {
+        placeTile(idx+1, secStemId);
+    }
+    if (tileGrid[idx-worldWidth-1] == underBlock) {
+        placeTile(idx-1, secStemId);
+    }
+
+    for (let i = 0; i < height; i++) {
+        placeTile(idx + worldWidth*(i+1), mainStemId);
+        if (randomNumber(1, 7) == 1) {
+            placeTile(idx + worldWidth*(i+1) + 1, secStemId);
+        }
+        if (randomNumber(1, 7) == 1) {
+            placeTile(idx + worldWidth*(i+1) - 1, secStemId);
+        }
+    }
+
+    if (randomNumber(1, 5) == 1) {
+        placeTile(idx + worldWidth*(height+1), secStemId);
+    } else {
+        placeTreeTop(topId, idx + worldWidth*(height+1), randomNumber(0, varityLength-1), varity);
+    }
+
+    for (let i = 0; i < height-1; i++) {
+        checkTreeBranch(idx+worldWidth*(i+2), branchId, varityLength, varity);
+    }
+}
+
+function checkTreeBranch(idx, branchId, varityLength, varity) {
+    if (randomNumber(1, 3) == 1) {
+        if (checkBranchSpace(idx-1)) {
+            placeTreeBranch(idx-1, false, branchId, varityLength, varity);
+        }
+    }
+    if (randomNumber(1, 3) == 1) {
+        if (checkBranchSpace(idx+2)) {
+            placeTreeBranch(idx+1, true, branchId, varityLength, varity);
+        }
+    }
+}
+
+function placeTreeBranch(idx, leftRight, branchId, varityLength, varity) {
+    const costumeOffset = randomNumber(0, varityLength-1);
+    if (leftRight) {
+        placeTile(idx, branchId);
+        offsetTileGrid[idx] = packSignedXY(1, costumeOffset+varity*varityLength);
+        placeTile(idx+1 + worldWidth, branchId);
+        offsetTileGrid[idx+1 + worldWidth] = packSignedXY(1+2*1, costumeOffset+varity*varityLength);
+        placeTile(idx+1 - worldWidth, branchId);
+        offsetTileGrid[idx+1 - worldWidth] = packSignedXY(1+2*2, costumeOffset+varity*varityLength);
+    } else {
+        placeTile(idx, branchId);
+        offsetTileGrid[idx] = packSignedXY(0, costumeOffset+varity*varityLength);
+        placeTile(idx-1 + worldWidth, branchId);
+        offsetTileGrid[idx-1 + worldWidth] = packSignedXY(2*1, costumeOffset+varity*varityLength);
+        placeTile(idx-1 - worldWidth, branchId);
+        offsetTileGrid[idx-1 - worldWidth] = packSignedXY(2*2, costumeOffset+varity*varityLength);
+    }
+}
+
+function checkBranchSpace(idx) {
+    if (tileGrid[idx] != 0) {return false;}
+    if (tileGrid[idx + worldWidth] != 0) {return false;}
+    if (tileGrid[idx - worldWidth] != 0) {return false;}
+    if (tileGrid[idx-1] != 0) {return false;}
+    if (tileGrid[idx-1 + worldWidth] != 0) {return false;}
+    if (tileGrid[idx-1 - worldWidth] != 0) {return false;}
+    return true;
+}
+
+function placeTreeTop(tile, idx, varityX, varityY) {
+    placeTile(idx, tile);
+    offsetTileGrid[idx] = packSignedXY(varityX, varityY);
+    placeTile(idx-2, tile);
+    offsetTileGrid[idx-2] = packSignedXY(varityX+3*1, varityY);
+    placeTile(idx+2, tile);
+    offsetTileGrid[idx+2] = packSignedXY(varityX+3*2, varityY);
+    placeTile(idx-2 + worldWidth*4, tile);
+    offsetTileGrid[idx-2 + worldWidth*4] = packSignedXY(varityX+3*3, varityY);
+    placeTile(idx+2 + worldWidth*4, tile);
+    offsetTileGrid[idx+2 + worldWidth*4] = packSignedXY(varityX+3*4, varityY);
 }
 
 async function solveTileOffsets() {
@@ -287,7 +427,17 @@ function solveTile(idx, center, all, wall) {
     const tileGroup = grid[idx];
     const cos = offsetGrid[idx];
 
-    if (tileData[tileGroup].tileSolver === "none") {return;}
+    let tileSolver = tileData[tileGroup]?.tileSolver ?? "none";
+    const tileSolverFallback = tileData[tileGroup]?.tileSolverFallback ?? "none";
+
+    if (tileSolver === "none") {return;}
+    if (tileSolver.includes("adv_")) {
+        solveAdvancedTile(idx, center, all, wall);
+        if (tmpTileSolverArray.length > 0 || tileSolverFallback == "none") {
+            return;
+        }
+        tileSolver = tileSolverFallback;
+    }
 
     let recipe = buildRecipe(idx + worldWidth, idx);
     recipe += buildRecipe(idx + 1, idx);
@@ -300,12 +450,12 @@ function solveTile(idx, center, all, wall) {
         tmpTileSolverPreTileGroup = tileGroup;
         tmpTileSolverArray = [];
 
-        const tmpSolverData = tileSolverData[tileData[tileGroup].tileSolver];
+        const tmpSolverData = tileSolverData[tileSolver];
 
         for (const key in tmpSolverData) {
             const value = tmpSolverData[key];
             if (value.includes(recipe)) {
-                if (center || !tmpSolverData[cos].includes(recipe)) {
+                if (center || !(tmpSolverData[cos]?.includes(recipe) ?? false)) {
                     tmpTileSolverArray.push(key);
                 }
             }
@@ -325,6 +475,108 @@ function buildRecipe(edgeIDX, mainIDX) {
     const mainTileData = tileData[mainTileID];
 
     return Number(edgeTileData.collisionState === mainTileData.collisionState).toString();
+}
+
+function solveAdvancedTile(idx, center, all, wall) {
+
+    const tileGroup = grid[idx];
+    const cos = offsetGrid[idx];
+
+    const tileSolver = tileData[tileGroup]?.tileSolver ?? "none";
+
+    let recipe = [];
+    recipe.push(buildAdvancedRecipe(idx + worldWidth));
+    recipe.push(buildAdvancedRecipe(idx + worldWidth + 1));
+    recipe.push(buildAdvancedRecipe(idx + 1));
+    recipe.push(buildAdvancedRecipe(idx - worldWidth + 1));
+    recipe.push(buildAdvancedRecipe(idx - worldWidth));
+    recipe.push(buildAdvancedRecipe(idx - worldWidth - 1));
+    recipe.push(buildAdvancedRecipe(idx - 1));
+    recipe.push(buildAdvancedRecipe(idx + worldWidth - 1));
+
+    tmpTileSolverArray = [];
+    tmpTileSolverPreRecipe = -1;
+    tmpTileSolverPreTileGroup = -1;
+
+    const tmpSolverData = tileSolverData[tileSolver];
+    const solverMetadata = tileData[tileGroup]?.tileSolverMetadata ?? "none";
+
+    if (solverMetadata == "none") {return;}
+
+    let sameIdCheck = false;
+    if (tmpSolverData.hasOwnProperty(cos)) {
+        sameIdCheck = compareFullAdvancedID(recipe, tmpSolverData[cos], solverMetadata);
+    }
+    for (const key in tmpSolverData) {
+        const value = tmpSolverData[key];
+        if (compareFullAdvancedID(recipe, value, solverMetadata)) {
+            if (center || !sameIdCheck) {
+                tmpTileSolverArray.push(key);
+            } else {
+                tmpTileSolverArray.push("skip");
+                return;
+            }
+        }
+    }
+    if (tmpTileSolverArray.length > 0) {
+        const rand = randomNumber(0, tmpTileSolverArray.length-1);
+        offsetGrid[idx] = tmpTileSolverArray[rand];
+    }
+}
+
+function compareFullAdvancedID(checkId, recipeId, solverMetadata) {
+    for (let i = 0; i < recipeId.length; i++) {
+        if (compareSingleAdvancedID(checkId, recipeId[i], solverMetadata)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function compareSingleAdvancedID(checkId, recipeId, solverMetadata) {
+    for (let i = 0; i < 8; i++) {
+        const currentRecipe = recipeId.substr(i*2 + 1, 1);
+        const currentCheckId = checkId[i];
+        if (currentRecipe == 0) {continue;}
+
+        const metaId = solverMetadata[currentRecipe];
+
+        let correctId = false;
+
+        for (let i2 = 0; i2 < metaId.length; i2++) {
+            const subId = metaId[i2];
+
+            if (subId.type == "id") {
+                for (let i3 = 0; i3 < subId.data.length; i3++) {
+                    if (correctId) {break;}
+                    correctId = subId.data[i3] == currentCheckId;
+                }
+            }
+            if (subId.type == "custom") {
+                const dataValue = tileData[currentCheckId]?.[subId.cType] ?? subId.cDefault;
+                correctId = dataValue == subId.data;
+            }
+
+            if (subId?.reversed ?? false) {
+                correctId = !correctId;
+            }
+
+            if (correctId) {break;}
+        }
+        
+        if (recipeId.substr(i*2, 1) == "!") {
+            correctId = !correctId;
+        }
+        
+        if (!correctId) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function buildAdvancedRecipe(edgeIDX) {
+    return edgeTileID = grid?.[edgeIDX] !== undefined ? grid[edgeIDX] : 0;
 }
 
 function placeTile(idx, tile, wallTile) {

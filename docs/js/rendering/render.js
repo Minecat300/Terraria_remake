@@ -1,11 +1,21 @@
-async function stitchImages(folderPath, fileExtention, fileName, start, end) {
+async function stitchImages(folderPath, wall) {
     const imagePaths = [];
+    const imageSubPaths = [];
 
-    for (let i = start; i <= end; i++) {
-        imagePaths.push(`${folderPath}/${fileName}${i}.${fileExtention}`);
+    for (let i in tileData) {
+        const value = tileData[i]?.imageSheet ?? "none";
+        const isWall = tileData[i]?.wall ?? false;
+        if (value == "none") {continue;}
+        if (isWall != wall) {continue;}
+        for (let i2 = 0; i2 < value.length; i2++) {
+            imagePaths.push(`${folderPath}/${value[i2]}`);
+            imageSubPaths.push(i);
+        }
     }
 
     console.log("Generated image paths: ", imagePaths);
+
+    const imageSheetData = {};
 
     const images = await Promise.all(imagePaths.map(loadImage));
 
@@ -16,15 +26,22 @@ async function stitchImages(folderPath, fileExtention, fileName, start, end) {
     const ctx = canvas.getContext("2d");
 
     let currentY = 0;
+    let i = 0;
     for (const img of images) {
         ctx.drawImage(img, 0, currentY, img.width, img.height);
+        if (!imageSheetData.hasOwnProperty(imageSubPaths[i])) {
+            imageSheetData[imageSubPaths[i]] = currentY;
+        }
         currentY += img.height;
+        i++;
     }
 
     const blob = await canvas.convertToBlob();
     //download(blob, "tilesheet.png", "png");
     const img = await createImageBitmap(blob);
-    return img;
+
+    console.log(imageSheetData);
+    return {img: img, data: imageSheetData};
 }
 
 function grayscaleToRedscale(imageData) {
@@ -286,7 +303,7 @@ function drawTileFrame() {
     usedKeys = new Set();
 
     drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, wallBitmap, 4);
-    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, tileBitmap, 0, xray);
+    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, tileBitmap, 2, xray);
     if (!xray) {
         drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, lightBitmap, 0, true);
     }
@@ -355,12 +372,12 @@ function drawBuildOverlay() {
 
 function updateChunk(x, y) {
     requestChunk(wallWorker, wallGrid, offsetWallGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
-    requestChunk(tileWorker, tileGrid, offsetTileGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
+    requestChunk(tileWorker, tileGrid, offsetTileGrid, x, y, { tilesheetSize: tilesheetSize, tilePadding: 4, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
 }
 
 function updateFullView() {
     updateViewspace(wallWorker, wallGrid, offsetWallGrid, { tilesheetSize: tilesheetSize, tilePadding: 8, tileTrueSize: 32, tileSpaceing: 4 });
-    updateViewspace(tileWorker, tileGrid, offsetTileGrid, { tilesheetSize: tilesheetSize, tilePadding: 0, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
+    updateViewspace(tileWorker, tileGrid, offsetTileGrid, { tilesheetSize: tilesheetSize, tilePadding: 4, tileTrueSize: tilesheetSize, tileSpaceing: 2 });
     updateLightViewspace(lightWorker, skyLightGrid, lightGrid, {dayNight: dayNight, smoothing: smoothing});
 }
 
@@ -442,11 +459,11 @@ let prevCam = {
 
 async function startGame() {
 
-    await stitchImages("./images/tileSheets", "png", "Tiles_", 0, 4).then((img) => {
+    await stitchImages("./images/tileSheets", false).then((img) => {
         tilesImg = img;
     }).catch(console.error);
 
-    await stitchImages("./images/wallSheets", "png", "Wall_", 1, 3).then((img) => {
+    await stitchImages("./images/wallSheets", true).then((img) => {
         wallsImg = img;
     }).catch(console.error);
 
@@ -468,12 +485,12 @@ async function startGame() {
     await loadItemImages();
     loadSmartCursor();
 
-    createImageBitmap(tilesImg).then((imageBitmap) => {
-        tileWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData }, [imageBitmap]);
+    createImageBitmap(tilesImg.img).then((imageBitmap) => {
+        tileWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData, tilesheetData: tilesImg.data }, [imageBitmap]);
     });
 
-    createImageBitmap(wallsImg).then((imageBitmap) => {
-        wallWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData }, [imageBitmap]);
+    createImageBitmap(wallsImg.img).then((imageBitmap) => {
+        wallWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData, tilesheetData: wallsImg.data }, [imageBitmap]);
     });
 
     resetPlayer();
