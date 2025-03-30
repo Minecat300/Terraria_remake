@@ -78,7 +78,7 @@ function drawOpenInventory() {
             drawItem(tx, ty, inventory.main[x + (3-y)*10], 1);            
         }
     }
-    drawItem(mouseX + uiSize*30, mouseY + uiSize*30, cursorSlot.item(), 1);
+    drawItem(mouseX - uiSize*23, mouseY + uiSize*30, cursorSlot.item(), 1);
 }
 
 function drawItem(x, y, item, scale) {
@@ -328,8 +328,4 @@ let oldSelectedSlot = selectedSlot.copy();
 const cursorSlot = new slot(0, "cursor");
 
 new slot(0, "hotbar").set(new item(1, 1));
-new slot(1, "hotbar").set(new item(2, 200));
-new slot(2, "hotbar").set(new item(3, 124));
-new slot(3, "hotbar").set(new item(11, 1254));
-new slot(4, "hotbar").set(new item(12, 9999));
-new slot(0, "main").set(new item(2, 5));
+new slot(1, "hotbar").set(new item(10, 1));

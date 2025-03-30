@@ -374,6 +374,7 @@ async function solveTileOffsets() {
     genData.maxSec = worldSize*2;
     genData.currentSec = 0;
 
+    tmpAdvTilesolverRecipes = [];
     tmpTileSolverArray = [];
     tmpTileSolverPreRecipe = -1;
     tmpTileSolverPreTileGroup = -1;
@@ -384,6 +385,7 @@ async function solveTileOffsets() {
         updateGenBar(100);
     }
 
+    tmpAdvTilesolverRecipes = [];
     tmpTileSolverArray = [];
     tmpTileSolverPreRecipe = -1;
     tmpTileSolverPreTileGroup = -1;
@@ -503,21 +505,39 @@ function solveAdvancedTile(idx, center, all, wall) {
 
     if (solverMetadata == "none") {return;}
 
-    let sameIdCheck = false;
-    if (tmpSolverData.hasOwnProperty(cos)) {
-        sameIdCheck = compareFullAdvancedID(recipe, tmpSolverData[cos], solverMetadata);
-    }
-    for (const key in tmpSolverData) {
-        const value = tmpSolverData[key];
-        if (compareFullAdvancedID(recipe, value, solverMetadata)) {
-            if (center || !sameIdCheck) {
-                tmpTileSolverArray.push(key);
-            } else {
-                tmpTileSolverArray.push("skip");
-                return;
-            }
+    if (tmpAdvTilesolverRecipes.hasOwnProperty(tileGroup) && all) {
+        if (tmpAdvTilesolverRecipes[tileGroup].hasOwnProperty(recipe)) {
+            tmpTileSolverArray = tmpAdvTilesolverRecipes[tileGroup][recipe];
         }
     }
+
+    if (tmpTileSolverArray.length == 0 || !all) {
+
+        let sameIdCheck = false;
+        if (tmpSolverData.hasOwnProperty(cos)) {
+            sameIdCheck = compareFullAdvancedID(recipe, tmpSolverData[cos], solverMetadata);
+        }
+
+        for (const key in tmpSolverData) {
+            const value = tmpSolverData[key];
+            if (compareFullAdvancedID(recipe, value, solverMetadata)) {
+                if (center || !sameIdCheck) {
+                    tmpTileSolverArray.push(key);
+                } else {
+                    tmpTileSolverArray.push("skip");
+                    return;
+                }
+            }
+        }
+
+        if (tmpTileSolverArray.length > 0 && all) {
+            if (!tmpAdvTilesolverRecipes.hasOwnProperty(tileGroup)) {
+                tmpAdvTilesolverRecipes[tileGroup] = {};
+            }
+            tmpAdvTilesolverRecipes[tileGroup][recipe] = tmpTileSolverArray;
+        }
+    }
+
     if (tmpTileSolverArray.length > 0) {
         const rand = randomNumber(0, tmpTileSolverArray.length-1);
         offsetGrid[idx] = tmpTileSolverArray[rand];
@@ -738,6 +758,8 @@ var tileData;
 let tmpTileSolverArray = [];
 let tmpTileSolverPreRecipe = -1;
 let tmpTileSolverPreTileGroup = -1;
+
+let tmpAdvTilesolverRecipes = {};
 
 let sx = 0;
 let sy = 0;

@@ -161,7 +161,7 @@
         },
         "collisionState": "passThrough",
         "lightBlock": 15,
-        "item": null,
+        "item": 9,
         "breakType": 2,
         "underBreak": "no",
         "hardness": 500,
@@ -183,7 +183,7 @@
         },
         "collisionState": "passThrough",
         "lightBlock": 15,
-        "item": null,
+        "item": 9,
         "breakType": 2,
         "underBreak": "no",
         "hardness": 500,
@@ -202,7 +202,7 @@
         "tileSolver": "none",
         "collisionState": "passThrough",
         "lightBlock": 0,
-        "item": null,
+        "item": 27,
         "breakType": 0,
         "tree": true,
         "treeType": "top"
@@ -218,9 +218,31 @@
         "tileSolver": "none",
         "collisionState": "passThrough",
         "lightBlock": 0,
-        "item": null,
+        "item": 27,
         "breakType": 0,
         "tree": true,
         "treeType": "branch"
+    },
+
+    "12": {
+        "id": 12,
+        "name": "Wood",
+        "imageSheet": ["Tiles_30.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 15, "y": 14},
+        "tileAssetSize": {"width": 16, "height": 16},
+        "tileSolver": "adv_default",
+        "tileSolverMetadata": {
+            "1": [{"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}],
+            "2": [{"type": "id", "data": [12]}],
+            "3": [{"type": "id", "data": [12]}, {"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid", "reversed": true}]
+        },
+        "tileSolverFallback": "default",
+        "collisionState": "solid",
+        "lightBlock": 45,
+        "item": 9,
+        "breakType": 1,
+        "hardness": 100,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
     }
 }

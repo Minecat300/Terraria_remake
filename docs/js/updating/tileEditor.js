@@ -90,9 +90,20 @@ function useBreakingTool(idx) {
     const tool = selectedSlot.item();
     const tile = tileGrid[idx];
     const hardness = tileData[tile]?.hardness ?? 100;
-    let toolPower;
+    const breakType = tileData[tile]?.breakType ?? 0;
+
+    let pickaxePower;
+    let axePower;
+    let hammerPower;
+
     if ((itemData[tool.id]?.pickaxePower ?? 0) != 0) {
-        toolPower = itemData[tool.id].pickaxePower;
+        pickaxePower = itemData[tool.id].pickaxePower;
+    }
+    if ((itemData[tool.id]?.axePower ?? 0) != 0) {
+        axePower = itemData[tool.id].axePower;
+    }
+    if ((itemData[tool.id]?.hammerPower ?? 0) != 0) {
+        hammerPower = itemData[tool.id].hammerPower;
     }
     if (buildDelay < 1) {
         if (buildAni.delay == 0) {
@@ -109,6 +120,20 @@ function useBreakingTool(idx) {
         if (!tileBreak.hasOwnProperty(idx)) {
             tileBreak[idx] = hardness;
         }
+
+        let toolPower = 0;
+        switch (breakType) {
+            case 1:
+                toolPower = pickaxePower;
+                break;
+            case 2:
+                toolPower = axePower;
+                break;
+            case 3:
+                toolPower = hammerPower;
+                break;
+        }
+        
         tileBreak[idx] -= toolPower;
         adaptivePlaceTile(tile, idx, false);
         playTileSound(tileData[tile]?.sound ?? {name: "Dig_", type: ".wav", amount: {start: 0, end: 2}});
@@ -200,6 +225,9 @@ function canBreakBlock(idx, tool, auto) {
         if ((tileData[tileGrid[idx]]?.breakType ?? 0) != 1) {return false;}
         const underBreak = tileData[tileGrid[idx+worldWidth]]?.underBreak ?? "yes";
         if (underBreak == "no") {return false;}
+    }
+    if ((itemData[tool.id]?.axePower ?? 0) != 0) {
+        if ((tileData[tileGrid[idx]]?.breakType ?? 0) != 2) {return false;}
     }
     return true;
 }

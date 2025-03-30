@@ -190,6 +190,26 @@ function updateKeyboard(event, state) {
 window.addEventListener("keydown", function(event){updateKeyboard(event, true)}, true);
 window.addEventListener("keyup", function(event){updateKeyboard(event, false)}, true);
 
+window.addEventListener("wheel", function(event){wheelScroll(event.deltaY)});
+
+function wheelScroll(dir) {
+    dir /= Math.abs(dir);
+    if (dir == 1) {
+        if (selectedHotbar == 9) {
+            selectedHotbar = 0;
+            return;
+        }
+        selectedHotbar++;
+    }
+    if (dir == -1) {
+        if (selectedHotbar == 0) {
+            selectedHotbar = 9;
+            return;
+        }
+        selectedHotbar--;
+    }
+}
+
 function getAsp(img) {return img.width / img.height;}
 
 function stampImage
@@ -351,6 +371,12 @@ function download(data, filename, type) {
             window.URL.revokeObjectURL(url);  
         }, 0); 
     }
+}
+
+function downloadJson(data, filename) {
+    const jsonstring = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonstring], { type: "application/json" });
+    download(blob, filename, "json");
 }
 
 function packSignedXY(x, y) {
