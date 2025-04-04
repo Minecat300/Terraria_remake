@@ -194,19 +194,30 @@ window.addEventListener("wheel", function(event){wheelScroll(event.deltaY)});
 
 function wheelScroll(dir) {
     dir /= Math.abs(dir);
-    if (dir == 1) {
-        if (selectedHotbar == 9) {
-            selectedHotbar = 0;
-            return;
+    if (!inventoryOpen) {
+        if (dir == 1) {
+            if (selectedHotbar == 9) {
+                selectedHotbar = 0;
+                return;
+            }
+            selectedHotbar++;
         }
-        selectedHotbar++;
-    }
-    if (dir == -1) {
-        if (selectedHotbar == 0) {
-            selectedHotbar = 9;
-            return;
+        if (dir == -1) {
+            if (selectedHotbar == 0) {
+                selectedHotbar = 9;
+                return;
+            }
+            selectedHotbar--;
         }
-        selectedHotbar--;
+    } else {
+        if (dir == 1) {
+            if (selectedRecipe >= currentCraftableRecipes.length-1) {return;}
+            selectedRecipe++;
+        }
+        if (dir == -1) {
+            if (selectedRecipe == 0) {return;}
+            selectedRecipe--;
+        }
     }
 }
 

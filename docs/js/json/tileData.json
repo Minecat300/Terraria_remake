@@ -244,5 +244,77 @@
         "breakType": 1,
         "hardness": 100,
         "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+    },
+
+    "13": {
+        "id": 13,
+        "name": "Wood Work Bench",
+        "imageSheet": ["Tiles_18_0.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 1, "y": 0},
+        "tileAssetSize": {"width": 16, "height": 18},
+        "multiblockSize": {"width": 2, "height": 1},
+        "canPlaceAbove": true,
+        "placementRestriction": "breakOnFloat",
+        "craftingStation": 1,
+        "collisionState": "platform",
+        "lightBlock": 8,
+        "item": 36,
+        "breakType": 1,
+        "hardness": 100,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+    },
+
+    "14": {
+        "id": 14,
+        "name": "Wood Wall",
+        "imageSheet": ["Wall_4.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 12, "y": 4},
+        "tileAssetSize": {"width": 32, "height": 32},
+        "tileSolver": "default",
+        "wall": true,
+        "lightBlock": 8,
+        "item": 93,
+        "breakType": 3,
+        "hardness": 100,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+    },
+
+    "15": {
+        "id": 15,
+        "name": "Wood Platform",
+        "imageSheet": ["Tiles_19_0.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 26, "y": 0},
+        "tileAssetSize": {"width": 16, "height": 16},
+        "tileSolver": "adv_platform",
+        "tileSolverMetadata": {
+            "1": [{"type": "id", "data": [15]}],
+            "2": [{"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}],
+            "3": [{"type": "id", "data": [15]}, {"type": "custom", "cType": "collisionState", "cDefault": "solid", "data": "solid"}]
+        },
+        "collisionState": "platform",
+        "lightBlock": 8,
+        "item": 94,
+        "breakType": 1,
+        "hardness": 100,
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+    },
+
+    "16": {
+        "id": 16,
+        "name": "Stone Wall",
+        "imageSheet": ["Wall_1.png"],
+        "startIDX": {"x": 0, "y": 0},
+        "endIDX": {"x": 12, "y": 4},
+        "tileAssetSize": {"width": 32, "height": 32},
+        "tileSolver": "default",
+        "wall": true,
+        "lightBlock": 8,
+        "item": 26,
+        "breakType": 3,
+        "hardness": 100,
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
     }
 }

@@ -1,0 +1,91 @@
+[
+    {
+        "name": "Wood Work Bench",
+        "item": 36,
+        "amount": 1,
+        "station": 0,
+        "recipe": [
+            {"item": 9, "amount": 10}
+        ]
+    },
+
+    {
+        "name": "Wood Wall",
+        "item": 93,
+        "amount": 4,
+        "station": 0,
+        "recipe": [
+            {"item": 9, "amount": 1}
+        ]
+    },
+
+    {
+        "name": "Wood (Wood Wall)",
+        "item": 9,
+        "amount": 1,
+        "station": 0,
+        "recipe": [
+            {"item": 93, "amount": 4}
+        ]
+    },
+
+    {
+        "name": "Wood Platform",
+        "item": 94,
+        "amount": 2,
+        "station": 0,
+        "recipe": [
+            {"item": 9, "amount": 1}
+        ]
+    },
+
+    {
+        "name": "Wood (Wood Platform)",
+        "item": 9,
+        "amount": 1,
+        "station": 0,
+        "recipe": [
+            {"item": 94, "amount": 2}
+        ]
+    },
+
+    {
+        "name": "Dirt Wall",
+        "item": 30,
+        "amount": 4,
+        "station": 1,
+        "recipe": [
+            {"item": 2, "amount": 1}
+        ]
+    },
+
+    {
+        "name": "Dirt (Dirt Wall)",
+        "item": 2,
+        "amount": 1,
+        "station": 1,
+        "recipe": [
+            {"item": 30, "amount": 4}
+        ]
+    },
+
+    {
+        "name": "Stone Wall",
+        "item": 26,
+        "amount": 4,
+        "station": 1,
+        "recipe": [
+            {"item": 3, "amount": 1}
+        ]
+    },
+
+    {
+        "name": "Stone (Stone Wall)",
+        "item": 3,
+        "amount": 1,
+        "station": 1,
+        "recipe": [
+            {"item": 26, "amount": 4}
+        ]
+    }
+]

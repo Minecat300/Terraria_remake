@@ -16,7 +16,7 @@ const player = {
     handAnimation: -1
 }
 
-let buildAni = {delay: 0, maxDelay: 0};
+let buildAni = {delay: 0, maxDelay: 0, item: {id: 0, amount: 0}};
 
 let creative = false;
 
@@ -302,7 +302,7 @@ function drawPlayer() {
         helmet, chestplate, greaves,
         {x: Number(player.falling > 1), y: 0}, arms, legsTime + 6, legs, legsTime, bodyTime,
         100 - Math.min(100, light/120*100),
-        player.handAnimation, selectedSlot.item()
+        player.handAnimation, buildAni.item
     );
 }
 

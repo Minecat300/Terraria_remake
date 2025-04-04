@@ -73,6 +73,15 @@
         "blockPlaced": 5
     },
 
+    "26": {
+        "id": 26,
+        "name": "Stone Wall",
+        "image": "Item_26.png",
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 16
+    },
+
     "27": {
         "id": 27,
         "name": "Acorn",
@@ -88,5 +97,32 @@
         "stack": 9999,
         "useTime": 15,
         "blockPlaced": 7
+    },
+
+    "36": {
+        "id": 36,
+        "name": "Wood Work Bench",
+        "image": "Item_36.png",
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 13
+    },
+
+    "93": {
+        "id": 93,
+        "name": "Wood Wall",
+        "image": "Item_93.png",
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 14
+    },
+
+    "94": {
+        "id": 94,
+        "name": "Wood Platform",
+        "image": "Item_94.png",
+        "stack": 9999,
+        "useTime": 15,
+        "blockPlaced": 15
     }
 }

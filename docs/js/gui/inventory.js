@@ -53,6 +53,8 @@ function drawOpenInventory() {
     }
     updateSelectedSlot();
 
+    getCraftableRecipes();
+
     for (let x = 0; x < inventory.hotbar.length; x++) {
         const tx = x*uiSize*72 + 55*uiSize;
         const ty = 55*uiSize;
@@ -78,6 +80,7 @@ function drawOpenInventory() {
             drawItem(tx, ty, inventory.main[x + (3-y)*10], 1);            
         }
     }
+    drawCraftingUi();
     drawItem(mouseX - uiSize*23, mouseY + uiSize*30, cursorSlot.item(), 1);
 }
 
@@ -159,6 +162,148 @@ function giveItem(tItem, container) {
     window.alert("your inventory is full. please make some space because in this version all items gets deleted when added to full inventory.")
 }
 
+function drawCraftingUi() {
+    if (currentCraftableRecipes.length < 1) {return;}
+    if (selectedRecipe > currentCraftableRecipes.length-1) {
+        selectedRecipe = currentCraftableRecipes.length-1;
+    }
+
+    const tx = 65*uiSize;
+    const ty = 700*uiSize;
+    drawAdvImage(ctx, inventoryGuiImages.slot3, new moveMatrix(tx, ty, uiSize*65, undefined));
+    drawItem(tx, ty, getCurrentRecipeItem(selectedRecipe), 1);
+
+    for (let i = 1; i < getCurrentRecipe(selectedRecipe).recipe.length+1; i++) {
+        const currRecipe = getCurrentRecipe(selectedRecipe).recipe[i-1];
+        const tx2 = i*50*uiSize+10;
+        drawAdvImage(ctx, inventoryGuiImages.slot4, new moveMatrix(tx+tx2, ty, uiSize*45, undefined));
+        drawItem(tx+tx2, ty, new item(currRecipe.item, currRecipe.amount), 0.75);
+    }
+
+    for (let i = 1; i < 5+1; i++) {
+        if (selectedRecipe+i >= currentCraftableRecipes.length) {break;}
+        const ty2 = i*56*uiSize+6;
+        drawAdvImage(ctx, inventoryGuiImages.slot4, new moveMatrix(tx, ty+ty2, uiSize*52, undefined));
+        drawItem(tx, ty+ty2, getCurrentRecipeItem(selectedRecipe+i), 0.75);
+    }
+    for (let i = 1; i < 5+1; i++) {
+        if (selectedRecipe-i < 0) {break;}
+        const ty2 = i*-56*uiSize-6;
+        drawAdvImage(ctx, inventoryGuiImages.slot4, new moveMatrix(tx, ty+ty2, uiSize*52, undefined));
+        drawItem(tx, ty+ty2, getCurrentRecipeItem(selectedRecipe-i), 0.75);
+    }
+
+    if (!mouseDown) {
+        m.m1 = true;
+        craftingDelay.delay = 0;
+        craftingDelay.next = 45;
+        craftingDelay.speed = 30;
+    }
+
+    for (let i = 1; i < 5+1; i++) {
+        if (selectedRecipe+i >= currentCraftableRecipes.length) {break;}
+        const ty2 = i*56*uiSize+6;
+        if (isMouseIn(tx-uiSize*26, tx+uiSize*26, ty+ty2-uiSize*26, ty+ty2+uiSize*26)) {
+            if (mouseDown && m.m1) {
+                m.m1 = false;
+                selectedRecipe += i;
+                break;
+            }
+        }
+    }
+    for (let i = 1; i < 5+1; i++) {
+        if (selectedRecipe-i < 0) {break;}
+        const ty2 = i*-56*uiSize-6;
+        if (isMouseIn(tx-uiSize*26, tx+uiSize*26, ty+ty2-uiSize*26, ty+ty2+uiSize*26)) {
+            if (mouseDown && m.m1) {
+                m.m1 = false;
+                selectedRecipe -= i;
+                break;
+            }
+        }
+    }
+
+    if (isMouseIn(tx-uiSize*32.5, tx+uiSize*32.5, ty-uiSize*32.5, ty+uiSize*32.5)) {
+        if (mouseDown && (cursorSlot.item().id == 0 || (cursorSlot.item().id == getCurrentRecipeItem(selectedRecipe).id && cursorSlot.item().amount <= itemData[getCurrentRecipeItem(selectedRecipe).id].stack-getCurrentRecipeItem(selectedRecipe).amount))) {
+            if (craftingDelay.delay > craftingDelay.next) {
+                craftingDelay.next += Math.ceil(craftingDelay.speed);
+                craftingDelay.speed = craftingDelay.speed / 1.2;
+                m.m1 = true;
+            }
+            craftingDelay.delay++;
+            if (m.m1) {
+                m.m1 = false;
+                for (let i = 0; i < getCurrentRecipe(selectedRecipe).recipe.length; i++) {
+                    const currRecipe = getCurrentRecipe(selectedRecipe).recipe[i];
+                    removeItemFromInventory(new item(currRecipe.item, currRecipe.amount));
+                }
+                if (cursorSlot.item().id == 0) {
+                    cursorSlot.set(new item(getCurrentRecipeItem(selectedRecipe).id, 0));
+                }
+                cursorSlot.addAmount(getCurrentRecipeItem(selectedRecipe).amount);
+            }
+        }
+    }
+}
+
+function getCurrentRecipe(recipe) {
+    return itemRecipesData[currentCraftableRecipes[recipe]];
+}
+
+function getCurrentRecipeItem(recipe) {
+    return new item(getCurrentRecipe(recipe).item, getCurrentRecipe(recipe).amount);
+}
+
+function getCraftableRecipes() {
+    getCurrentCraftingStations();
+    currentCraftableRecipes = [];
+
+    for (let i = 0; i < itemRecipesData.length; i++) {
+        const currentRecipe = itemRecipesData[i];
+        const station = currentRecipe?.station ?? 0;
+        if (!currentStations.includes(station) && station != 0) {continue;}
+        let err = false;
+        for (let i2 = 0; i2 < currentRecipe.recipe.length; i2++) {
+            const currItem = currentRecipe.recipe[i2];
+            if (!doesInventoryContain(currItem.item, currItem.amount)) {err = true; break;}
+        }
+        if (err) {continue;}
+        currentCraftableRecipes.push(i);
+    }
+}
+
+function getCurrentCraftingStations() {
+    currentStations = [];
+    for (let x = 0; x < 8; x++) {
+        for (let y = 0; y < 6; y++) {
+            const tx = x - 4 + getGridPos(player.pos.x);
+            const ty = y - 4 + getGridPos(player.pos.y);
+            const tile = tileGrid[getIDX(tx, ty)];
+            const station = tileData[tile]?.craftingStation ?? 0;
+            if (station == 0) {continue;}
+            if (currentStations.includes(station)) {continue;}
+            currentStations.push(station);
+        }
+    }
+}
+
+function doesInventoryContain(tItem, amount) {
+    let currAmount = 0;
+    for (let i = 0; i < inventory["hotbar"].length; i++) {
+        const tmpItem = inventory["hotbar"][i];
+        if (tmpItem.id != tItem) {continue;}
+        currAmount += tmpItem.amount;
+    }
+    if (currAmount >= amount) {return true;}
+    for (let i = 0; i < inventory["main"].length; i++) {
+        const tmpItem = inventory["main"][i];
+        if (tmpItem.id != tItem) {continue;}
+        currAmount += tmpItem.amount;
+    }
+    if (currAmount >= amount) {return true;}
+    return false;
+}
+
 function removeItemFromInventory(tItem) {
     let amount = tItem.amount;
     for (let i = 0; i < inventory["hotbar"].length; i++) {
@@ -169,7 +314,7 @@ function removeItemFromInventory(tItem) {
             tmpSlot.set(new item(0, 0));
             return true;
         }
-        if (tmpSlot.item().amount < amount) {
+        if (tmpSlot.item().amount > amount) {
             tmpSlot.setAmount(tmpSlot.item().amount - amount);
             return true;
         }
@@ -184,7 +329,7 @@ function removeItemFromInventory(tItem) {
             tmpSlot.set(new item(0, 0));
             return true;
         }
-        if (tmpSlot.item().amount < amount) {
+        if (tmpSlot.item().amount > amount) {
             tmpSlot.setAmount(tmpSlot.item().amount - amount);
             return true;
         }
@@ -264,6 +409,10 @@ class slot {
         inventory[this.container][this.id].amount = amount;
     }
 
+    addAmount(amount) {
+        inventory[this.container][this.id].amount += amount;
+    }
+
     setId(id) {
         inventory[this.container][this.id].id = id;
     }
@@ -286,6 +435,7 @@ async function loadInventoryGuiImages() {
     inventoryGuiImages.slot1 = await loadImage('images/gui/Inventory_Back.png');
     inventoryGuiImages.slot2 = await loadImage('images/gui/Inventory_Back9.png');
     inventoryGuiImages.slot3 = await loadImage('images/gui/Inventory_Back14.png');
+    inventoryGuiImages.slot4 = await loadImage('images/gui/Inventory_Back4.png');
     inventoryGuiImages.radial = await loadImage('images/gui/Radial.png');
     inventoryGuiImages.selection = await loadImage('images/gui/selection.png');
 }
@@ -309,6 +459,18 @@ let itemData;
 
 let uiOveride = false;
 
+let itemRecipesData;
+let currentStations = [];
+let currentCraftableRecipes = [];
+
+let craftingDelay = {
+    delay: 0,
+    next: 45,
+    speed: 30
+};
+
+let selectedRecipe = 0;
+
 loadInventoryGuiImages();
 
 let inventory = {
@@ -329,3 +491,5 @@ const cursorSlot = new slot(0, "cursor");
 
 new slot(0, "hotbar").set(new item(1, 1));
 new slot(1, "hotbar").set(new item(10, 1));
+new slot(2, "hotbar").set(new item(9, 50));
+new slot(3, "hotbar").set(new item(9, 50));
