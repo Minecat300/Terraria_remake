@@ -491,5 +491,4 @@ const cursorSlot = new slot(0, "cursor");
 
 new slot(0, "hotbar").set(new item(1, 1));
 new slot(1, "hotbar").set(new item(10, 1));
-new slot(2, "hotbar").set(new item(9, 50));
-new slot(3, "hotbar").set(new item(9, 50));
+
