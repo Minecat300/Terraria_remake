@@ -2,7 +2,7 @@ let brush = 0;
 let smartCursor = false;
 let buildDelay = 0;
 let tileBreak = {};
-let buildGuide = {x: 0, y: 0, active: false};
+let buildGuide = {x: 0, y: 0, active: false, valid: false};
 
 const defaultInteractionRange = {
     building: {width: 5, height: 5},
@@ -58,11 +58,13 @@ function editTiles() {
     } else {
         if (capSize(tileX * tilesheetSize, tileY * tilesheetSize, range)) {return;}
         buildGuide.active = true;
+        buildGuide.valid = false;
         buildGuide.x = tileX;
         buildGuide.y = tileY;
         if (!canTransformTile(index, brush, tool)) {return;}
     }
     buildGuide.active = true;
+    buildGuide.valid = true;
     buildGuide.x = tileX;
     buildGuide.y = tileY;
 
@@ -370,6 +372,10 @@ function breakBlock(idx, wall = false, secoundaryUpdates = true) {
     if (secoundaryUpdates) {
         updateTreeBreak(idx, prevTile);
     }
+    
+    if (!wall && (tileData[tileGrid[idx + worldWidth]]?.placementRestriction ?? "none") == "breakOnFloat") {
+        breakBlock(idx + worldWidth);
+    }
 }
 
 function breakMultiblock(tile, idx) {
@@ -387,6 +393,11 @@ function breakMultiblock(tile, idx) {
             tileGrid[index] = 0;
             requestChunkUpdate(index);
             updateSkyLight(index);
+            if (y == multiblockSize.height-1) {
+                if ((tileData[tileGrid[offsetIdx + getIDX(x, y+1)]]?.placementRestriction ?? "none") == "breakOnFloat") {
+                    breakBlock(offsetIdx + getIDX(x, y+1));
+                }
+            }
         }
     }
 

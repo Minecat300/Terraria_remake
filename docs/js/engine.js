@@ -286,6 +286,11 @@ class moveMatrix {
         this.width = width;
         this.height = height;
     }
+
+    addPosition(x, y) {
+        this.x += x;
+        this.y += y;
+    }
 }
 
 class rotationMatrix {
@@ -388,6 +393,19 @@ function downloadJson(data, filename) {
     const jsonstring = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonstring], { type: "application/json" });
     download(blob, filename, "json");
+}
+
+async function downloadImagebitmap(data, filename) {
+    const oc = new OffscreenCanvas(data.width, data.height);
+    const octx = oc.getContext("2d");
+
+    octx.drawImage(data, 0, 0);
+
+    const blob = await new Promise(resolve => {
+        oc.convertToBlob().then(resolve);
+    });
+
+    download(blob, filename, "png");
 }
 
 function packSignedXY(x, y) {

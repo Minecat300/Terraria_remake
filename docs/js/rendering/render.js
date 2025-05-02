@@ -61,6 +61,73 @@ function grayscaleToRedscale(imageData) {
     return imageData;
 }
 
+function turnImageRed(imageData) {
+    if (!imageData || !imageData.data) {
+        throw new Error('Invalid imageData provided to turnImageRed.');
+    }
+
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        data[i] = 255;
+        data[i + 1] = 0;
+        data[i + 2] = 0;
+    }
+
+    return imageData;
+}
+
+async function loadMultiblockPreview() {
+    for (let key in tileData) {
+        let value = tileData[key];
+        let multiblockSize = value?.multiblockSize ?? "none";
+        if (multiblockSize == "none") {continue;}
+        multiblockPreviewImages[key] = await getMultiblockPreviewImage(key, value, multiblockSize);
+    }
+}
+
+async function getMultiblockPreviewImage(key, value, multiblockSize) {
+    const imageCollection = {};
+
+    const canvasPadding = 2;
+    const tileSpaceing = 2;
+
+    const canvasWidth = tilesheetSize*multiblockSize.width + canvasPadding*2;
+    const canvasHeight = tilesheetSize*multiblockSize.height + canvasPadding*2;
+
+    const oc = new OffscreenCanvas(canvasWidth, canvasHeight);
+    const octx = oc.getContext("2d");
+
+    const tilesheetSubSet = tilesImg.data[value.id];
+    const tileAssetSize = value?.tileAssetSize ?? {width: 16, height: 16};
+    const tileAssetOffsetX = tileAssetSize?.offsetX ?? 0;
+    const tileAssetOffsetY = tileAssetSize?.offsetY ?? 0;
+    const startIDX = value?.startIDX ?? {x: 0, y: 0};
+
+    for (let x = 0; x < multiblockSize.width; x++) {
+        for (let y = 0; y < multiblockSize.height; y++) {
+            octx.drawImage(
+                tilesImg.img,
+                (x + startIDX.x) * (tileAssetSize.width + tileSpaceing), (y + startIDX.y) * (tileAssetSize.height + tileSpaceing) + tilesheetSubSet,
+                tileAssetSize.width, tileAssetSize.height,
+                x * tilesheetSize + canvasPadding + tileAssetOffsetX, y * tilesheetSize + canvasPadding + tileAssetOffsetY,
+                tileAssetSize.width, tileAssetSize.height
+            );
+        }
+    }
+
+    const imageData = octx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+    imageCollection.data = oc.transferToImageBitmap();
+
+    const redImage = turnImageRed(imageData);
+
+    octx.putImageData(redImage, 0, 0);
+    imageCollection.red = oc.transferToImageBitmap();
+
+    return imageCollection;
+}
+
 async function loadPlayerAssets() {
 
     playerImages.beepsHelmet = await loadImage('images/player/armor/Armor_Head_54.png');
@@ -358,6 +425,8 @@ function drawTileFrame() {
 function drawBuildOverlay() {
     if (!buildGuide.active) {return;}
     const move = new moveMatrix(((buildGuide.x + 0.5)*16 - cam.x)*cam.zoom + viewspaceWidth/2, viewspaceHeight/2 - ((buildGuide.y + 0.5)*16 - cam.y)*cam.zoom, undefined, undefined);
+    const item = selectedSlot.item();
+    const tile = itemData[item.id]?.blockPlaced ?? 0;
 
     if (smartCursor) {
         move.setSize(inventoryGuiImages.selection.width*cam.zoom/2, undefined);
@@ -366,6 +435,18 @@ function drawBuildOverlay() {
         move.setSize(inventoryGuiImages.radial.width*cam.zoom, undefined);
         ctx.filter = 'opacity(50%)';
         drawAdvImage(ctx, inventoryGuiImages.radial, move);
+        ctx.filter = 'none'; 
+    }
+    if ((tileData[tile]?.multiblockSize ?? "none") != "none") {
+        const imageCollection = multiblockPreviewImages[tile];
+        move.setSize(imageCollection.data.width*cam.zoom, undefined);
+        move.addPosition((imageCollection.data.width-20)/2*cam.zoom, (imageCollection.data.height-20)/2*cam.zoom);
+        ctx.filter = 'opacity(70%)';
+        drawAdvImage(ctx, imageCollection.data, move);
+        if (!buildGuide.valid) {
+            ctx.filter = 'opacity(35%)';
+            drawAdvImage(ctx, imageCollection.red, move);
+        }
         ctx.filter = 'none'; 
     }
 }
@@ -439,6 +520,8 @@ let chunkBoarders = false;
 let chunkUpdates = false;
 let xray = false;
 
+let multiblockPreviewImages = {};
+
 let dayNight = 1;
 let smoothing = 2;
 
@@ -466,6 +549,8 @@ async function startGame() {
     await stitchImages("./images/wallSheets", true).then((img) => {
         wallsImg = img;
     }).catch(console.error);
+
+    await loadMultiblockPreview();
 
     await loadPlayerAssets();
 

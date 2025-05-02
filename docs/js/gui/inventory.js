@@ -204,6 +204,7 @@ function drawCraftingUi() {
         if (selectedRecipe+i >= currentCraftableRecipes.length) {break;}
         const ty2 = i*56*uiSize+6;
         if (isMouseIn(tx-uiSize*26, tx+uiSize*26, ty+ty2-uiSize*26, ty+ty2+uiSize*26)) {
+            uiOveride = true;
             if (mouseDown && m.m1) {
                 m.m1 = false;
                 selectedRecipe += i;
@@ -215,6 +216,7 @@ function drawCraftingUi() {
         if (selectedRecipe-i < 0) {break;}
         const ty2 = i*-56*uiSize-6;
         if (isMouseIn(tx-uiSize*26, tx+uiSize*26, ty+ty2-uiSize*26, ty+ty2+uiSize*26)) {
+            uiOveride = true;
             if (mouseDown && m.m1) {
                 m.m1 = false;
                 selectedRecipe -= i;
@@ -224,6 +226,7 @@ function drawCraftingUi() {
     }
 
     if (isMouseIn(tx-uiSize*32.5, tx+uiSize*32.5, ty-uiSize*32.5, ty+uiSize*32.5)) {
+        uiOveride = true;
         if (mouseDown && (cursorSlot.item().id == 0 || (cursorSlot.item().id == getCurrentRecipeItem(selectedRecipe).id && cursorSlot.item().amount <= itemData[getCurrentRecipeItem(selectedRecipe).id].stack-getCurrentRecipeItem(selectedRecipe).amount))) {
             if (craftingDelay.delay > craftingDelay.next) {
                 craftingDelay.next += Math.ceil(craftingDelay.speed);
