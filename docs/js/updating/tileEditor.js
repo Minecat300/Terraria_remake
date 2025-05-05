@@ -244,7 +244,7 @@ function canPlaceBlock(idx, tool, auto) {
     const tile = itemData[tool.id]?.blockPlaced ?? 0;
     if (isIdxAtPlayer(tile, idx)) {return false;}
     if ((tileData[tile]?.multiblockSize ?? "none") != "none") {
-        return canPlaceMutliblock(idx, tile);
+        return canPlaceMutliblock(idx, tileData[tile].multiblockSize, (tileData[tile]?.placementRestriction ?? "none") == "breakOnFloat");
     }
 
     if (tileData[tile]?.wall ?? false) {
@@ -266,21 +266,6 @@ function canPlaceBlock(idx, tool, auto) {
     if (!(tileData[tileGrid[idx+worldWidth]]?.replaceable ?? false)) {return true;}
     if (!(tileData[tileGrid[idx-1]]?.replaceable ?? false)) {return true;}
     if (!(tileData[tileGrid[idx-worldWidth]]?.replaceable ?? false)) {return true;}
-}
-
-function canPlaceMutliblock(idx, tile) {
-    const multiblockSize = tileData[tile].multiblockSize;
-    if ((tileData[tile]?.placementRestriction ?? "none") == "breakOnFloat") {
-        for (let x = 0; x < multiblockSize.width; x++) {
-            if (tileData[tileGrid[idx+x-worldWidth]]?.replaceable ?? false) {return false;}
-        }
-    }
-    for (let x = 0; x < multiblockSize.width; x++) {
-        for (let y = 0; y < multiblockSize.height; y++) {
-            if (!(tileData[tileGrid[idx + getIDX(x, y)]]?.replaceable ?? false)) {return false;}
-        }
-    }
-    return true;
 }
 
 function isIdxAtPlayer(tile, idx) {
@@ -334,20 +319,6 @@ function adaptivePlaceTile(tile, idx, wall = false) {
     updateSkyLight(idx);
 }
 
-function placeMultiblock(tile, idx) {
-    const multiblockSize = tileData[tile].multiblockSize;
-    const startIDX = tileData[tile]?.startIDX ?? {x: 0, y: 0};
-    for (let x = 0; x < multiblockSize.width; x++) {
-        for (let y = 0; y < multiblockSize.height; y++) {
-            const index = idx + getIDX(x, y);
-            tileGrid[index] = tile;
-            offsetTileGrid[index] = packSignedXY(startIDX.x + x, startIDX.y + (multiblockSize.height - y));
-            requestChunkUpdate(index);
-            updateSkyLight(index);
-        }
-    }
-}
-
 function breakBlock(idx, wall = false, secoundaryUpdates = true) {
     if (isOnEdge(idx)) {return;}
     if ((tileData[tileGrid[idx]]?.multiblockSize ?? "none") != "none") {breakMultiblock(tileGrid[idx], idx); return;}
@@ -382,7 +353,7 @@ function breakMultiblock(tile, idx) {
     const multiblockSize = tileData[tile].multiblockSize;
     const startIDX = tileData[tile]?.startIDX ?? {x: 0, y: 0};
     let [xOffset, yOffset] = unpackSignedXY(offsetTileGrid[idx]);
-    yOffset = multiblockSize.height - yOffset;
+    yOffset = multiblockSize.height-1 - yOffset;
     xOffset -= startIDX.x;
     yOffset -= startIDX.y;
     let offsetIdx = idx - getIDX(xOffset, yOffset);

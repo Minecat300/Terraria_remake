@@ -128,6 +128,15 @@ async function getMultiblockPreviewImage(key, value, multiblockSize) {
     return imageCollection;
 }
 
+async function loadAnimatedTiles() {
+    for (let key in tileData) {
+        const value = tileData[key];
+        if ((value?.blockAnimation ?? "none") != "none") {
+            animatedTilesList.push(key);
+        }
+    }
+}
+
 async function loadPlayerAssets() {
 
     playerImages.beepsHelmet = await loadImage('images/player/armor/Armor_Head_54.png');
@@ -266,17 +275,17 @@ function requestChunk(worker, grid, offsetGrid, x, y, tileSize) {
     const chunkX = Math.floor(x/chunkSize.width)*chunkSize.width;
     const chunkY = Math.floor(y/chunkSize.height)*chunkSize.height;
 
-    let chunkGrid = extractViewspace(grid, chunkX, chunkY, chunkSize.width, chunkSize.height);
+    let [chunkGrid, includedAnimatedTiles] = extractViewspace(grid, chunkX, chunkY, chunkSize.width, chunkSize.height, true);
     let chunkOffsetGrid = extractViewspace(offsetGrid, chunkX, chunkY, chunkSize.width, chunkSize.height);
 
     if (chunkGrid === undefined) {
         return;
     }
 
-    createTileMap(worker, chunkGrid, chunkSize.width, chunkSize.height, chunkOffsetGrid, tileSize, { x: chunkX, y: chunkY });
+    createTileMap(worker, chunkGrid, chunkSize.width, chunkSize.height, chunkOffsetGrid, tileSize, { x: chunkX, y: chunkY, includedAnimatedTiles: includedAnimatedTiles });
 }
 
-function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight) {
+function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight, animationCheck = false) {
     const viewspace = new Uint16Array(viewWidth * viewHeight);
 
     if (viewX+viewWidth < 0) {
@@ -288,7 +297,13 @@ function extractViewspace(grid, viewX, viewY, viewWidth, viewHeight) {
         const viewRowStart = y * viewWidth + Math.max(viewX, 0) - viewX;
         viewspace.set(grid.subarray(sourceRowStart, sourceRowStart + viewWidth - (Math.max(viewX, 0) - viewX)), viewRowStart);
     }
-    return viewspace;
+
+    if (!animationCheck) {return viewspace;}
+
+    const byteSet = new Set(viewspace);
+    const includedAnimatedTiles = animatedTilesList.filter(val => byteSet.has(Number(val)));
+
+    return [viewspace, includedAnimatedTiles];
     
 }
 
@@ -296,7 +311,7 @@ function getLight(idx, settings) {
     return  Math.floor(Math.max(skyLightGrid[idx] * settings.dayNight, lightGrid[idx]));
 }
 
-function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, bitmap, padding, forground = false) {
+function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, bitmap, padding, tileSize, forground = false, light = false) {
 
     const layerCanvas = new OffscreenCanvas(viewspaceGridWidth*chunkSize.width*8, viewspaceGridHeight*chunkSize.height*8);
     const layerCtx = layerCanvas.getContext("2d");
@@ -320,7 +335,28 @@ function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX
             const drawX = x*chunkSize.width*8 - padding;
             const drawY = (viewspaceGridHeight-y-1)*chunkSize.height*8 - padding;
 
-            layerCtx.drawImage(value.image, drawX, drawY, chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2);
+            if (light) {
+                layerCtx.drawImage(value.image, drawX, drawY, chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2);
+            } else {
+                layerCtx.drawImage(
+                    value.image,
+                    0, 0,
+                    value.image.width, chunkSize.height*tileSize + padding*4,
+                    drawX, drawY,
+                    chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2
+                );
+                const animationHeight = value.data?.animationHeight ?? "none";
+                if (animationHeight != "none") {
+                    layerCtx.drawImage(
+                        value.image,
+                        0, (Math.floor(animationTick / 6) % animationHeight) * (chunkSize.height*tileSize + padding*4),
+                        value.image.width, chunkSize.height*tileSize + padding*4,
+                        drawX, drawY,
+                        chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2
+                    );
+                }
+            }
+
             if (forground && chunkUpdates) {
                 if (requestedLightChunks.includes(key)) {
                     layerCtx.fillStyle = "rgba(0, 255, 0, 0.3)";
@@ -369,10 +405,10 @@ function drawTileFrame() {
 
     usedKeys = new Set();
 
-    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, wallBitmap, 4);
-    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, tileBitmap, 2, xray);
+    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, wallBitmap, 4, tilesheetSize);
+    drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, tileBitmap, 2, tilesheetSize, xray);
     if (!xray) {
-        drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, lightBitmap, 0, true);
+        drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, lightBitmap, 0, 1, true, true);
     }
 
     for (const key in tileBitmap) {
@@ -420,6 +456,23 @@ function drawTileFrame() {
             i++;
         }
     }
+
+    animationTick++;
+
+    if (chunkUpdates && keyPress.p) {
+        keyPress.p = false;
+        const chunkX = Math.floor(getGridPos(player.pos.x)/chunkSize.width)*chunkSize.width;
+        const chunkY = Math.floor(getGridPos(player.pos.y)/chunkSize.height)*chunkSize.height;
+
+        const key = chunkX + "," + chunkY;
+        if (tileBitmap[key] == undefined) {return;}
+
+        const value = tileBitmap[key];
+        if (value.image == undefined) {return;}
+
+        downloadImagebitmap(value.image, "chunk picture.png");
+    }
+
 }
 
 function drawBuildOverlay() {
@@ -440,7 +493,7 @@ function drawBuildOverlay() {
     if ((tileData[tile]?.multiblockSize ?? "none") != "none") {
         const imageCollection = multiblockPreviewImages[tile];
         move.setSize(imageCollection.data.width*cam.zoom, undefined);
-        move.addPosition((imageCollection.data.width-20)/2*cam.zoom, (imageCollection.data.height-20)/2*cam.zoom);
+        move.addPosition((imageCollection.data.width-20)/2*cam.zoom, (20-imageCollection.data.height)/2*cam.zoom);
         ctx.filter = 'opacity(70%)';
         drawAdvImage(ctx, imageCollection.data, move);
         if (!buildGuide.valid) {
@@ -522,6 +575,9 @@ let xray = false;
 
 let multiblockPreviewImages = {};
 
+let animatedTilesList = [];
+let animationTick = 0;
+
 let dayNight = 1;
 let smoothing = 2;
 
@@ -551,6 +607,7 @@ async function startGame() {
     }).catch(console.error);
 
     await loadMultiblockPreview();
+    await loadAnimatedTiles();
 
     await loadPlayerAssets();
 

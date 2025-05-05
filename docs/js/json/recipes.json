@@ -87,5 +87,16 @@
         "recipe": [
             {"item": 26, "amount": 4}
         ]
+    },
+
+    {
+        "name": "Furnace (WIP)",
+        "item": 33,
+        "amount": 1,
+        "station": 1,
+        "recipe": [
+            {"item": 3, "amount": 20},
+            {"item": 9, "amount": 10}
+        ]
     }
 ]

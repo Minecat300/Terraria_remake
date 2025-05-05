@@ -35,7 +35,7 @@ let genData = {
 
 async function createWorld(width, height) {
     genData.tag = "Setting Up";
-    genData.maxMain = 9;
+    genData.maxMain = 10;
     genData.currentMain = 0;
     genData.maxSec = 0;
     genData.currentSec = 0;
@@ -64,6 +64,7 @@ async function createWorld(width, height) {
     generateSky();
     generateGrass();
     generateTrees();
+    generateSingleBlockStructures();
     generateWorldBorders();
     await solveTileOffsets();
 }
@@ -367,6 +368,63 @@ function placeTreeTop(tile, idx, varityX, varityY) {
     offsetTileGrid[idx-2 + worldWidth*4] = packSignedXY(varityX+3*3, varityY);
     placeTile(idx+2 + worldWidth*4, tile);
     offsetTileGrid[idx+2 + worldWidth*4] = packSignedXY(varityX+3*4, varityY);
+}
+
+function generateSingleBlockStructures() {
+    genData.tag = "Placing decor";
+    genData.maxSec = 100;
+    genData.currentSec = 0;
+
+    for (let i = 0; i < 100; i++) {
+        let idx = findOpenSpace(worldGTCH + Math.floor((worldHeight-worldGTCH)/3), 5000, 2, 2, true);
+        if (idx != -1) {
+            placeMultiblock(17, idx, true);
+        }
+        genData.currentSec++;
+        updateGenBar(5);
+    }
+    genData.currentMain++;
+}
+
+function findOpenSpace(maxHeight, tries, width, height, tileUnder = false) {
+    for (let i = 0; i < tries; i++) {
+        let x = randomNumber(0, worldWidth);
+        let y = randomNumber(0, maxHeight);
+        if (tileGrid[getIDX(x, y)] != 0) {continue;}
+        if (!canPlaceMutliblock(getIDX(x, y), {width: width, height: height}, tileUnder)) {continue;}
+        return getIDX(x, y);
+    }
+    return -1;
+}
+
+function canPlaceMutliblock(idx, multiblockSize, tileUnder = false) {
+    if (tileUnder) {
+        for (let x = 0; x < multiblockSize.width; x++) {
+            if (tileData[tileGrid[idx+x-worldWidth]]?.replaceable ?? false) {return false;}
+        }
+    }
+    for (let x = 0; x < multiblockSize.width; x++) {
+        for (let y = 0; y < multiblockSize.height; y++) {
+            if (!(tileData[tileGrid[idx + getIDX(x, y)]]?.replaceable ?? false)) {return false;}
+        }
+    }
+    return true;
+}
+
+function placeMultiblock(tile, idx, worldGen = false) {
+    const multiblockSize = tileData[tile].multiblockSize;
+    const startIDX = tileData[tile]?.startIDX ?? {x: 0, y: 0};
+    for (let x = 0; x < multiblockSize.width; x++) {
+        for (let y = 0; y < multiblockSize.height; y++) {
+            const index = idx + getIDX(x, y);
+            tileGrid[index] = tile;
+            offsetTileGrid[index] = packSignedXY(startIDX.x + x, startIDX.y + (multiblockSize.height-1 - y));
+            if (!worldGen) {
+                requestChunkUpdate(index);
+                updateSkyLight(index);
+            }
+        }
+    }
 }
 
 async function solveTileOffsets() {

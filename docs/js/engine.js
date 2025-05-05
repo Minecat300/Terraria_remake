@@ -73,7 +73,8 @@ const keyPress = {
     rightArrow: false,
     c: false,
     shift: false,
-    control: false
+    control: false,
+    p: false
 }
 
 function updateKeyboard(event, state) {
@@ -113,6 +114,9 @@ function updateKeyboard(event, state) {
             break;
         case "control":
             keyPress.control = state;
+            break;
+        case "p":
+            keyPress.p = state;
             break;
         case "b":
             if (state) {

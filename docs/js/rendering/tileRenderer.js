@@ -32,16 +32,25 @@ self.onmessage = function (e) {
     const tilePadding = tileSizeObj.tilePadding;
     const tileSpaceing = tileSizeObj.tileSpaceing;
 
+    const includedAnimatedTiles = data.includedAnimatedTiles;
+
     const tiles = new Uint16Array(viewportTiles.data);
     const tilesOffset = new Uint16Array(viewportTilesOffset)
     const viewportWidth = viewportTiles.width;
     const viewportHeight = viewportTiles.height;
 
+    const canvasWidth = viewportWidth * tileSize + tilePadding*2;
+    const canvasHeight = viewportHeight * tileSize + tilePadding*2;
+
     if (!self.canvas) {
-        self.canvas = new OffscreenCanvas(viewportWidth * tileSize + tilePadding*2, viewportHeight * tileSize + tilePadding*2);
+        self.canvas = new OffscreenCanvas(canvasWidth, canvasHeight);
         self.ctx = self.canvas.getContext("2d");
         self.ctx.imageSmoothingEnabled = false;
     }
+
+    const animationHeight = getAnimationHeight(includedAnimatedTiles);
+    self.canvas.height = canvasHeight * animationHeight;
+    data.animationHeight = animationHeight;
 
     self.ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
 
@@ -55,6 +64,7 @@ self.onmessage = function (e) {
             const tileConfig = WtileData[tileID];
             const tileCostomeEnd = tileConfig?.endIDX ?? {x: 15, y: 14};
             const tileAssetSize = tileConfig?.tileAssetSize || { width: tileTrueSize, height: tileTrueSize };
+            const blockAnimation = tileConfig?.blockAnimation ?? "none";
             const tileAssetOffsetX = tileAssetSize?.offsetX ?? 0;
             const tileAssetOffsetY = tileAssetSize?.offsetY ?? 0;
             const tilesheetOffset = tilesheetData?.[tileID] ?? 0;
@@ -101,17 +111,46 @@ self.onmessage = function (e) {
             tileAssetX = tileAssetX % (tileCostomeEnd.x+1);
             tileAssetY = tileAssetY % (tileCostomeEnd.y+1);
 
+            const cropX = (tileAssetX + tileConfig.startIDX.x) * (tileAssetSize.width + tileSpaceing);
+            const cropY = (tileAssetY + tileConfig.startIDX.y) * (tileAssetSize.height + tileSpaceing) + tilesheetOffset;
+            const posX = x * tileSize - tileAssetSize.width/2 + 8 + tilePadding + tileAssetOffsetX + offsetX;
+            const posY = y * tileSize - tileAssetSize.height/2 + 8 + tilePadding + tileAssetOffsetY + offsetY;
+
             self.ctx.drawImage(
                 tilesheet,
-                (tileAssetX + tileConfig.startIDX.x) * (tileAssetSize.width + tileSpaceing), (tileAssetY + tileConfig.startIDX.y) * (tileAssetSize.height + tileSpaceing) + tilesheetOffset,
+                cropX, cropY,
                 tileAssetSize.width, tileAssetSize.height,
-                x * tileSize - tileAssetSize.width/2 + 8 + tilePadding + tileAssetOffsetX + offsetX, y * tileSize - tileAssetSize.height/2 + 8 + tilePadding + tileAssetOffsetY +  offsetY,
+                posX, posY,
                 tileAssetSize.width, tileAssetSize.height
             );
+
+            if (blockAnimation == "none") {continue;}
+
+            for (let i = 1; i < animationHeight; i++) {
+                self.ctx.drawImage(
+                    tilesheet,
+                    cropX, cropY + (i % blockAnimation.length) * blockAnimation.height * (tileAssetSize.height + tileSpaceing),
+                    tileAssetSize.width, tileAssetSize.height,
+                    posX, posY + canvasHeight*i,
+                    tileAssetSize.width, tileAssetSize.height
+                );
+            }
 
         }
     }
     self.canvas.convertToBlob().then((blob) => {
         self.postMessage({ frame: blob, data: data });
     });
+}
+
+function getAnimationHeight(tiles) {
+    let length = 1;
+    for (let i = 0; i < tiles.length; i++) {
+        const tile = tiles[i];
+        const animationData = WtileData[tile].blockAnimation;
+        if (animationData.length > length) {
+            length = animationData.length;
+        }
+    }
+    return length;
 }
