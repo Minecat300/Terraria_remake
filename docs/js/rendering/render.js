@@ -346,7 +346,7 @@ function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX
                     chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2
                 );
                 const animationHeight = value.data?.animationHeight ?? "none";
-                if (animationHeight != "none") {
+                if (animationHeight != "none" && Math.floor(animationTick / 6) % animationHeight != 0) {
                     layerCtx.drawImage(
                         value.image,
                         0, (Math.floor(animationTick / 6) % animationHeight) * (chunkSize.height*tileSize + padding*4),
@@ -659,22 +659,20 @@ tileWorker.onmessage = (e) => {
     tileCam = e.data.data;
     const data = e.data.data;
     const key = data.x + "," + data.y;
-    createImageBitmap(frame).then((bitmap) => {
-        tileBitmap[key] = {};
-        tileBitmap[key].image = bitmap;
-        tileBitmap[key].data = data;
-    });
+
+    tileBitmap[key] = {};
+    tileBitmap[key].image = frame;
+    tileBitmap[key].data = data;
 }
 
 wallWorker.onmessage = (e) => {
     const frame = e.data.frame;
     const data = e.data.data;
     const key = data.x + "," + data.y;
-    createImageBitmap(frame).then((bitmap) => {
-        wallBitmap[key] = {};
-        wallBitmap[key].image = bitmap;
-        wallBitmap[key].data = data;
-    });
+
+    wallBitmap[key] = {};
+    wallBitmap[key].image = frame;
+    wallBitmap[key].data = data;
 }
 
 lightWorker.onmessage = (e) => {
@@ -682,10 +680,8 @@ lightWorker.onmessage = (e) => {
     const data = e.data.data;
     const key = data.x + "," + data.y;
     if (lightBitmap[key] == undefined || lightBitmap[key].data.time <= data.time) {
-        createImageBitmap(frame).then((bitmap) => {
-            lightBitmap[key] = {};
-            lightBitmap[key].image = bitmap;
-            lightBitmap[key].data = data;
-        });
+        lightBitmap[key] = {};
+        lightBitmap[key].image = frame;
+        lightBitmap[key].data = data;
     }
 }

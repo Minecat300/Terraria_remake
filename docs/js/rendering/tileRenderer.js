@@ -119,9 +119,9 @@ self.onmessage = function (e) {
             self.ctx.drawImage(
                 tilesheet,
                 cropX, cropY,
-                tileAssetSize.width, tileAssetSize.height,
+                tileAssetSize.width, Math.min(tileAssetSize.height ,canvasHeight - posY),
                 posX, posY,
-                tileAssetSize.width, tileAssetSize.height
+                tileAssetSize.width, Math.min(tileAssetSize.height ,canvasHeight - posY)
             );
 
             if (blockAnimation == "none") {continue;}
@@ -138,8 +138,8 @@ self.onmessage = function (e) {
 
         }
     }
-    self.canvas.convertToBlob().then((blob) => {
-        self.postMessage({ frame: blob, data: data });
+    createImageBitmap(self.canvas).then((bitmap) => {
+        self.postMessage({ frame: bitmap, data: data }, [bitmap]);
     });
 }
 

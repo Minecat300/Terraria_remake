@@ -73,8 +73,8 @@ self.onmessage = function (e) {
 
     self.ctx.putImageData(imageData, 0, 0);
 
-    self.canvas.convertToBlob().then((blob) => {
-        self.postMessage({ frame: blob, data: data });
+    createImageBitmap(self.canvas).then((bitmap) => {
+        self.postMessage({ frame: bitmap, data: data }, [bitmap]);
     });
 
 }
