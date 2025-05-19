@@ -44,23 +44,6 @@ async function stitchImages(folderPath, wall) {
     return {img: img, data: imageSheetData};
 }
 
-function grayscaleToRedscale(imageData) {
-    if (!imageData || !imageData.data) {
-        throw new Error('Invalid imageData provided to grayscaleToRedscale.');
-    }
-    
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-        const gray = data[i];
-        data[i] = gray;       
-        data[i + 1] = 0;      
-        data[i + 2] = 0;      
-    }
-
-    return imageData;
-}
-
 function turnImageRed(imageData) {
     if (!imageData || !imageData.data) {
         throw new Error('Invalid imageData provided to turnImageRed.');
@@ -346,7 +329,7 @@ function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX
                     chunkSize.width*8 + padding*2, chunkSize.height*8 + padding*2
                 );
                 const animationHeight = value.data?.animationHeight ?? "none";
-                if (animationHeight != "none" && Math.floor(animationTick / 6) % animationHeight != 0) {
+                if (animationHeight != "none" && animationHeight > 1 && Math.floor(animationTick / 6) % animationHeight != 0) {
                     layerCtx.drawImage(
                         value.image,
                         0, (Math.floor(animationTick / 6) % animationHeight) * (chunkSize.height*tileSize + padding*4),
@@ -609,6 +592,8 @@ async function startGame() {
     await loadMultiblockPreview();
     await loadAnimatedTiles();
 
+    await loadEntityAssets();
+
     await loadPlayerAssets();
 
     playerLoadedAssets["default"] = {};
@@ -649,9 +634,16 @@ function renderMain() {
     ctx.imageSmoothingEnabled = false;
     drawTileFrame();
     drawPlayer();
+    drawEntities();
     drawBuildOverlay();
     drawInventory();
+    drawDebugOverlay();
     drawAsp();
+}
+
+function drawDebugOverlay() {
+    drawOnlyText("FPS: " + FPS, viewspaceWidth - 5, viewspaceHeight - 40, 30, "right", "white", "black")
+    drawOnlyText("UPS: " + UPS, viewspaceWidth - 5, viewspaceHeight - 5, 30, "right", "white", "black")
 }
 
 tileWorker.onmessage = (e) => {

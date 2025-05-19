@@ -1,5 +1,5 @@
-let skyLightGrid;
-let lightGrid;
+let skyLightGrid = new Uint8Array();
+let lightGrid = new Uint8Array();
 
 let lucIdx;
 

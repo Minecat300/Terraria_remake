@@ -266,7 +266,7 @@ function stampImage
         c.translate(x, y);
         c.rotate(-rotate);
         c.translate(-cx, -cy);
-        c.scale(width/img.width, height/img.height);
+        c.scale(width/cropWidth, height/cropHeight);
         //c.filter = effects;
         c.drawImage(
             img,
@@ -437,8 +437,22 @@ function unpackSignedXY(value) {
     return [x, y];
 }
 
-function randomNumber(min, max) {
-    return Math.min(Math.floor(Math.random()*(max-min+1))+min, max);
+function randomNumber(min, max, decimal = false) {
+    if (min == max) {
+        return min;
+    }
+    if (min > max) {
+        const tmp = max;
+        max = min;
+        min = tmp;
+    }
+    if(decimal) {
+        return Math.min((Math.random()*(max-min+1))+min, max);
+    } else {
+        min = Math.floor(min);
+        max = Math.floor(max);
+        return Math.min(Math.floor(Math.random()*(max-min+1))+min, max);
+    }
 }
 
 async function loadJSON(path) {
@@ -484,6 +498,67 @@ function loadImage(path) {
         img.onload = () => resolve(createImageBitmap(img));
         img.onerror = reject;
     });
+}
+
+async function loadAndColorAgjustImage(path, adjust) {
+    let image = await loadImage(path);
+    const isGrayScale = adjust?.isGrayScale ?? false;
+
+    if (isGrayScale) {
+        let imageData = bitmapToImageData(image);
+        imageData = grayscaleToRedscale(imageData);
+        image = imageDataToBitmap(imageData);
+    }
+
+    const oc = new OffscreenCanvas(image.width, image.height);
+    const octx = oc.getContext("2d");
+
+    const h = (adjust?.hueAdjust ?? 0) * 360;
+    const s = (adjust?.saturate ?? 1) * 100;
+    const l = ((adjust?.brightness ?? 1)-1) * 200 + 100;
+    const t = 1 - (adjust?.transparency ?? 0);
+
+    octx.filter = `hue-rotate(${h}deg) saturate(${s}%) brightness(${l}%) opacity(${t})`;
+    octx.drawImage(image, 0, 0);
+
+    const adjustedImage = oc.transferToImageBitmap();
+    return adjustedImage;
+}
+
+function imageDataToBitmap(imageData) {
+    const oc = new OffscreenCanvas(imageData.width, imageData.height);
+    const octx = oc.getContext("2d");
+
+    octx.putImageData(imageData, 0, 0);
+
+    return oc.transferToImageBitmap();
+}
+
+function bitmapToImageData(bitmap) {
+    const oc = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const octx = oc.getContext("2d");
+
+    octx.drawImage(bitmap, 0, 0);
+
+    const imageData = octx.getImageData(0, 0, bitmap.width, bitmap.height);
+    return imageData;
+}
+
+function grayscaleToRedscale(imageData) {
+    if (!imageData || !imageData.data) {
+        throw new Error('Invalid imageData provided to grayscaleToRedscale.');
+    }
+    
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const gray = data[i];
+        data[i] = gray;       
+        data[i + 1] = 0;      
+        data[i + 2] = 0;      
+    }
+
+    return imageData;
 }
 
 function sin(r) {

@@ -458,7 +458,7 @@ let uiSize = 0.9;
 let inventoryGuiImages = {};
 let itemImages = {};
 
-let itemData;
+let itemData = {};
 
 let uiOveride = false;
 

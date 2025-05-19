@@ -1,11 +1,13 @@
 let worldWidth;
 let worldHeight;
 let worldSize;
-let worldGTCH;
-let tileGrid;
-let wallGrid;
-let offsetTileGrid;
-let offsetWallGrid;
+let worldCavernHeight;
+let worldUndergroundHeight;
+let worldUnderworldHeight;
+let tileGrid = new Uint16Array();
+let wallGrid = new Uint16Array();
+let offsetTileGrid = new Uint16Array();
+let offsetWallGrid = new Uint16Array();
 
 let genPreviousTime = 0;
 let genCurrentTime = 0;
@@ -44,10 +46,12 @@ async function createWorld(width, height) {
     worldWidth = width;
     worldHeight = height;
     worldSize = width * height;
-    worldGTCH = Math.ceil(height / 1.5217391304338754);
+    worldCavernHeight = Math.ceil(height / (35 / 23));
+    worldUndergroundHeight = Math.floor((height-worldCavernHeight)/3) + worldCavernHeight;
+    worldUnderworldHeight = Math.ceil(height*0.17);
 
-    maxGroundHeight = Math.floor((worldHeight-worldGTCH)/2)+30;
-    minGroundHeight = Math.floor((worldHeight-worldGTCH)/2)-30;
+    maxGroundHeight = Math.floor((worldHeight-worldCavernHeight)/2)+30;
+    minGroundHeight = Math.floor((worldHeight-worldCavernHeight)/2)-30;
 
     tileGrid = new Uint16Array(worldSize);
     wallGrid = new Uint16Array(worldSize);
@@ -83,7 +87,7 @@ function generateWorldBase() {
             offsetWallGrid[idx] = tmp;
 
             wallGrid[idx] = 6;
-            tileGrid[idx] = (y < worldGTCH) + 1;
+            tileGrid[idx] = (y < worldCavernHeight) + 1;
             //tileGrid[idx] = randomNumber(1, 2);
             //tileGrid[idx] = ((y % 2) && (x % 2)) +1;
             genData.currentSec++;
@@ -104,7 +108,7 @@ function generateSky() {
     let tmp;
 
     for (let x = 0; x < worldWidth; x++) {
-        const tY = worldGTCH + groundOffset + Math.floor(Math.floor((Math.sin(x*Math.PI/180) + 1.1*Math.sin(2*x*Math.PI/180))*3));
+        const tY = worldCavernHeight + groundOffset + Math.floor(Math.floor((Math.sin(x*Math.PI/180) + 1.1*Math.sin(2*x*Math.PI/180))*3));
         for (let y = tY; y < worldHeight; y++) {
             placeTile(getIDX(x, y), 0, 0);
             placeTile(getIDX(x+1, y), undefined, 0);
@@ -133,7 +137,7 @@ function generateSky() {
                 maxGroundHeight += tmp;
                 minGroundHeight += tmp;
             }
-            if (randomNumber(1, 20) == 1 && minGroundHeight > Math.floor(worldHeight-worldGTCH)-30) {
+            if (randomNumber(1, 20) == 1 && minGroundHeight > Math.floor(worldHeight-worldCavernHeight)-30) {
                 if (randomNumber(1, 6) == 1) {
                     tmp = randomNumber(60, 70);
                 } else {
@@ -180,14 +184,14 @@ function generateStoneAndDirtVerity() {
 
     makeDirtInStone(400, 200);
     makeDirtInStone(700, 50);
-    makeStoneInDirt(450, 100, worldGTCH + Math.floor((worldHeight - worldGTCH)/2), 10);
+    makeStoneInDirt(450, 100, worldCavernHeight + Math.floor((worldHeight - worldCavernHeight)/2), 10);
     makeStoneInDirt(1000, 20, worldHeight, 5);
     genData.currentMain++;
 }
 
 function makeDirtInStone(amount, maxLength){
     for (let i = 0; i < amount; i++) {
-        makeSlither(randomNumber(0, worldWidth), randomNumber(0, worldGTCH), randomNumber(2, 5), 1, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
+        makeSlither(randomNumber(0, worldWidth), randomNumber(0, worldCavernHeight), randomNumber(2, 5), 1, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
         genData.currentSec++;
         updateGenBar(10);
     }
@@ -195,7 +199,7 @@ function makeDirtInStone(amount, maxLength){
 
 function makeStoneInDirt(amount, maxLength, maxHeight, maxSize) {
     for (let i = 0; i < amount; i++) {
-        makeSlither(randomNumber(0, worldWidth), randomNumber(worldGTCH, randomNumber(worldGTCH, maxHeight)), randomNumber(2, maxSize), 2, undefined, 5, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
+        makeSlither(randomNumber(0, worldWidth), randomNumber(worldCavernHeight, randomNumber(worldCavernHeight, maxHeight)), randomNumber(2, maxSize), 2, undefined, 5, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.5, true), randomNumber(0, 1));
         genData.currentSec++;
         updateGenBar(10);
     }
@@ -214,7 +218,7 @@ function generateCaves() {
 
 function placeCave(amount, maxLength, maxSize, extended) {
     for (let i = 0; i < amount; i++) {
-        makeSlither(randomNumber(0, worldWidth), randomNumber(0, worldGTCH + Math.floor((worldHeight - worldGTCH)/2)), randomNumber(2, maxSize), 0, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.1, true), randomNumber(0.1, 1, true));
+        makeSlither(randomNumber(0, worldWidth), randomNumber(0, worldCavernHeight + Math.floor((worldHeight - worldCavernHeight)/2)), randomNumber(2, maxSize), 0, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.1, true), randomNumber(0.1, 1, true));
         for (let i2 = 0; i2 < randomNumber(0, extended); i2++) {
             makeSlither(undefined, undefined, randomNumber(2, maxSize), 0, undefined, 10, maxLength, randomNumber(-2, -0.5, true), randomNumber(0.5, 2, true), randomNumber(-1, -0.1, true), randomNumber(0.1, 1, true));
         }
@@ -228,8 +232,8 @@ function generateOres() {
     genData.maxSec = 500+600;
     genData.currentSec = 0;
 
-    placeOre(5, 3, 500, 0, worldHeight, worldGTCH);
-    placeOre(4, 3, 600, 0, worldHeight, worldGTCH);
+    placeOre(5, 3, 500, 0, worldHeight, worldCavernHeight);
+    placeOre(4, 3, 600, 0, worldHeight, worldCavernHeight);
     genData.currentMain++;
 }
 
@@ -376,7 +380,7 @@ function generateSingleBlockStructures() {
     genData.currentSec = 0;
 
     for (let i = 0; i < 100; i++) {
-        let idx = findOpenSpace(worldGTCH + Math.floor((worldHeight-worldGTCH)/3), 5000, 2, 2, true);
+        let idx = findOpenSpace(worldUndergroundHeight, 5000, 2, 2, true);
         if (idx != -1) {
             placeMultiblock(17, idx, true);
         }
@@ -788,12 +792,21 @@ function unpackSignedXY(value) {
 }
 
 function randomNumber(min, max, decimal = false) {
-    if(decimal) {
-        return Math.random()*(max-min)+min
-    } else {
-        return Math.round(Math.random()*(max-min))+min
+    if (min == max) {
+        return min;
     }
-    
+    if (min > max) {
+        const tmp = max;
+        max = min;
+        min = tmp;
+    }
+    if(decimal) {
+        return Math.min((Math.random()*(max-min+1))+min, max);
+    } else {
+        min = Math.floor(min);
+        max = Math.floor(max);
+        return Math.min(Math.floor(Math.random()*(max-min+1))+min, max);
+    }
 }
 
 async function loadJSON(path) {
@@ -811,7 +824,7 @@ async function loadJSON(path) {
 }
 
 let tileSolverData;
-var tileData;
+var tileData = {};
 
 let tmpTileSolverArray = [];
 let tmpTileSolverPreRecipe = -1;
@@ -830,7 +843,7 @@ this.onmessage = function (e) {
     
         self.postMessage({
             type: "world",
-            worldWidth: worldWidth, worldHeight: worldHeight, worldSize: worldSize, worldGTCH: worldGTCH,
+            worldWidth: worldWidth, worldHeight: worldHeight, worldSize: worldSize, worldCavernHeight: worldCavernHeight, worldUndergroundHeight: worldUndergroundHeight, worldUnderworldHeight: worldUnderworldHeight,
             tileGrid: tileGrid, wallGrid: wallGrid, offsetTileGrid: offsetTileGrid, offsetWallGrid: offsetWallGrid 
         });
     })();

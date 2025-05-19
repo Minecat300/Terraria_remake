@@ -334,7 +334,8 @@ function breakBlock(idx, wall = false, secoundaryUpdates = true) {
         tileGrid[idx] = 0;
     }
 
-    giveItem(new item(itemId, 1), "inventory");
+    let [x, y] = getXY(idx);
+    spawnEntity(new entity(0, new entityMotion(x*16 + randomNumber(1, 15), y*16 + randomNumber(1, 15)), {itemId: itemId, itemAmount: 1}));
 
     updateTileSolving(idx, wall);
     requestChunkUpdate(idx);
@@ -373,7 +374,8 @@ function breakMultiblock(tile, idx) {
     }
 
     itemId = tileData[tile]?.item ?? 0;
-    giveItem(new item(itemId, 1), "inventory");
+    let [x, y] = getXY(idx);
+    spawnEntity(new entity(0, new entityMotion(x*16+8, y*16+8), {itemId: itemId, itemAmount: 1}));
 }
 
 function updateTreeBreak(idx, tile) {

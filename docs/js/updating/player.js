@@ -13,7 +13,8 @@ const player = {
     jumping: 99,
     dir: 1,
     frame: 0,
-    handAnimation: -1
+    handAnimation: -1,
+    solid: 0
 }
 
 let buildAni = {delay: 0, maxDelay: 0, item: {id: 0, amount: 0}};
@@ -22,8 +23,6 @@ let creative = false;
 
 const gravity = -0.5;
 const tiny = -0.000001;
-
-let solid;
 
 function updatePlayerMain() {
     if (creative) {
@@ -40,9 +39,9 @@ function updatePlayerMain() {
 function movePlayerX() {
     const orgY = player.pos.y;
     player.pos.x += player.speed.x/2;
-    fixCollisionInDir(player.speed.x, 0);
+    fixPlayerCollisionInDir(player.speed.x, 0);
     const orgX = player.pos.x;
-    const orgSolid = solid;
+    const orgSolid = player.solid;
     if (player.axis.x != 0) {
         player.dir = player.axis.x;
     }
@@ -59,8 +58,8 @@ function movePlayerX() {
     if (checkForStepSpace(index) && player.falling < 3 && ((tileConfig?.collisionState ?? "none") === "solid") && Math.abs(player.speed.x) > 0) {
         player.pos.y += 16;
         player.pos.x += player.dir*2;
-        fixCollisionInDir(0, 0);
-        if (solid > 0) {
+        fixPlayerCollisionInDir(0, 0);
+        if (player.solid > 0) {
             player.pos.x = orgX;
             player.pos.y = orgY;
             if (orgSolid > 0) {
@@ -68,7 +67,7 @@ function movePlayerX() {
             }
         }
     } else {
-        if (solid > 0) {
+        if (player.solid > 0) {
             player.speed.x = 0;
         }
     }
@@ -77,12 +76,12 @@ function movePlayerX() {
 function movePlayerY() {
     player.pos.y += player.speed.y;
     player.speed.y += gravity;
-    fixCollisionInDir(0, player.speed.y);
+    fixPlayerCollisionInDir(0, player.speed.y);
     player.falling++;
     if (player.speed.y < -10) {
         player.speed.y = -10;
     }
-    if (solid > 0) {
+    if (player.solid > 0) {
         if (player.speed.y < 0) {
             player.falling = 0;
         } else {
@@ -139,30 +138,30 @@ function checkForStepSpace(idx) {
     return true;
 }
 
-function fixCollisionInDir(dx, dy) {
+function fixPlayerCollisionInDir(dx, dy) {
     const width = player.size.width;
     const height = player.size.height;
 
-    solid = 0;
+    player.solid = 0;
     for (let i = 0; i < 2; i++) {
         let di = 1;
         let y = -height;
         for (let iy = 0; iy < Math.ceil(height*2/16)+1; iy++) {
             let x = width + tiny;
             for (let ix = 0; ix < Math.ceil(width*2/16)+1; ix++) {
-                fixCollisionAtPoint(player.pos.x + x, player.pos.y + y, 2*(di == 2)+1*(di == 1), dx, dy);
+                fixPlayerCollisionAtPoint(player.pos.x + x, player.pos.y + y, 2*(di == 2)+1*(di == 1), dx, dy);
                 x -= width*2/Math.ceil(width*2/16);
             }
             y += height*2/Math.ceil(height*2/16);
             di++
         }
-        if (solid < 1) {
+        if (player.solid < 1) {
             return;
         }
     }
 }
 
-function fixCollisionAtPoint(x, y, part, dx, dy) {
+function fixPlayerCollisionAtPoint(x, y, part, dx, dy) {
     const tile = getTile(x, y);
     const tileConfig = tileData[tile];
     const collisionState = tileConfig?.collisionState ?? "none";
@@ -176,7 +175,7 @@ function fixCollisionAtPoint(x, y, part, dx, dy) {
         if (part != 1 || modY - dy < 15) {return;}
         if (player.axis.y == -1 && player.falling < 5) {return;}
     }
-    solid = 10;
+    player.solid = 10;
     if (dy < 0) {
         player.pos.y += 16 - modY;
     }
@@ -235,11 +234,11 @@ function moveCamera() {
 function resetPlayer() {
     let y = worldHeight - (worldBoarders+1);
 
-    while (tileGrid[getIDX(worldWidth/2, y)] == 0 && y > 0) {
+    while (tileData[tileGrid[getIDX(worldWidth/2, y)]].collisionState == "passThrough" && y > 0) {
         y--;
     }
     player.pos.x = worldWidth/2*16;
-    player.pos.y = y*16;
+    player.pos.y = (y+1.5)*16 + player.size.height/2;
 }
 
 function drawPlayer() {
@@ -400,9 +399,9 @@ function drawBodypart(img, x, y, scale, dir, cx, cy, light, pixleOffsetY = 0) {
     cx *= 40/img.width;
     cy *= 56/img.height;
 
-    drawAdvImage(ctx, img, new moveMatrix(x, y - pixleOffsetY*scale*2, scale*img.width*dir, scale*img.height), undefined, new cropMatrix(cx, cy, 40/img.width, 54/img.height), true);
+    drawAdvImage(ctx, img, new moveMatrix(x, y - pixleOffsetY*scale*2, scale*dir*40, scale*54), undefined, new cropMatrix(cx, cy, 40/img.width, 54/img.height), true);
     if (light == 0 || xray) {return;}
     ctx.filter = `brightness(0%) opacity(${light}%)`;
-    drawAdvImage(ctx, img, new moveMatrix(x, y - pixleOffsetY*scale*2, scale*img.width*dir, scale*img.height), undefined, new cropMatrix(cx, cy, 40/img.width, 54/img.height), true);
+    drawAdvImage(ctx, img, new moveMatrix(x, y - pixleOffsetY*scale*2, scale*dir*40, scale*54), undefined, new cropMatrix(cx, cy, 40/img.width, 54/img.height), true);
     ctx.filter = 'none';
 } 

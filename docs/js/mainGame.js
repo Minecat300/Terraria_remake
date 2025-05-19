@@ -9,6 +9,8 @@ let timeElapsed = 0;
 let deltaUpdates = 0;
 let deltaFrames = 0;
 let deltaChecks = 0;
+let FPS = 0;
+let UPS = 0;
 
 const gameLoop = async () => {
     await sleep(50);
@@ -40,7 +42,8 @@ const gameLoop = async () => {
             frames++;
         }
         if (deltaChecks >= 1) {
-            console.log("FPS: " + frames + "\nUPS: " + updates);
+            FPS = frames;
+            UPS = updates;
             updates = 0;
             frames = 0;
             deltaChecks--;

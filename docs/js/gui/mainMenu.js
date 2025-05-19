@@ -157,10 +157,12 @@ async function setupWorld() {
     tileSolverData = await loadJSON('./js/json/tileSolver.json');
     itemData = await loadJSON('./js/json/itemData.json');
     itemRecipesData = await loadJSON('./js/json/recipes.json');
+    entityData = await loadJSON('./js/json/entityData.json');
     console.log(tileData);
     console.log(tileSolverData);
     console.log(itemData);
     console.log(itemRecipesData);
+    console.log(entityData);
 
     worldGenWorker.postMessage({
         tileData: tileData,
@@ -176,7 +178,9 @@ worldGenWorker.onmessage = (e) => {
         worldWidth = data.worldWidth;
         worldHeight = data.worldHeight;
         worldSize = data.worldSize;
-        worldGTCH = data.worldGTCH;
+        worldCavernHeight = data.worldCavernHeight;
+        worldUndergroundHeight = data.worldUndergroundHeight;
+        worldUnderworldHeight = data.worldUnderworldHeight;
         tileGrid = new Uint16Array(data.tileGrid);
         wallGrid = new Uint16Array(data.wallGrid);
         offsetTileGrid = new Uint16Array(data.offsetTileGrid);

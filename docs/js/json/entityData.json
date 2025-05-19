@@ -1,0 +1,35 @@
+{
+    "-3": {
+        "id": -3,
+        "name": "Green Slime",
+        "imageSheet": "NPC_1.png",
+        "behaviorScript": "slimeScript.js",
+        "behaviorData": {"firstRun": true, "mode": 0, "maxJumpHeight": 7},
+        "colorAdjust": {"isGrayScale": true, "hueAdjust": 0.4, "saturate": 0.5, "brightness": 2.2, "transparency": 0.3},
+        "imageData": {"flipImageX": false, "flipImageY": false, "renderWidth": 32, "renderHeight": 24, "imageSubWidth": 32, "imageSubHeight": 24, "padding": 2, "length": 2},
+        "collisionData": {"width": 26, "height": 20},
+        "spawnCondition": {"naturalSpawn": true, "spawnLevel": ["surface"], "activeEntityValue": 1}
+    },
+
+    "0": {
+        "id": 0,
+        "name": "Item",
+        "imageSheet": "unknown.png",
+        "behaviorScript": "itemScript.js",
+        "behaviorData": {"firstRun": true},
+        "imageData": {"renderWidth": 32, "renderHeight": 32, "imageSubWidth": 32, "imageSubHeight": 32, "padding": 0, "length": 1},
+        "collisionData": {"width": 0, "height": 0}
+    },
+
+    "1": {
+        "id": 1,
+        "name": "Blue Slime",
+        "imageSheet": "NPC_1.png",
+        "behaviorScript": "slimeScript.js",
+        "behaviorData": {"firstRun": true, "mode": 0, "maxJumpHeight": 8},
+        "colorAdjust": {"isGrayScale": true, "hueAdjust": 0.666, "saturate": 0.5, "brightness": 2, "transparency": 0.3},
+        "imageData": {"flipImageX": false, "flipImageY": false, "renderWidth": 32, "renderHeight": 24, "imageSubWidth": 32, "imageSubHeight": 24, "padding": 2, "length": 2},
+        "collisionData": {"width": 26, "height": 20},
+        "spawnCondition": {"naturalSpawn": true, "spawnLevel": ["surface"], "activeEntityValue": 1}
+    }
+}
