@@ -412,6 +412,12 @@ async function downloadImagebitmap(data, filename) {
     download(blob, filename, "png");
 }
 
+async function downloadImagebitmapCollection(data, filename) {
+    for (let i = 0; i < data.length; i++) {
+        downloadImagebitmap(data[i], `${filename}_${i}.png`);
+    }
+}
+
 function packSignedXY(x, y) {
     if (x < -128 || x > 127 || y < -128 || y > 127) {
       throw new Error("x and y must be in the range -128 to 127.");
@@ -500,7 +506,7 @@ function loadImage(path) {
     });
 }
 
-async function loadAndColorAgjustImage(path, adjust) {
+async function loadAndColorAgjustImage(path, adjust = {}) {
     let image = await loadImage(path);
     const isGrayScale = adjust?.isGrayScale ?? false;
 
@@ -523,6 +529,32 @@ async function loadAndColorAgjustImage(path, adjust) {
 
     const adjustedImage = oc.transferToImageBitmap();
     return adjustedImage;
+}
+
+async function loadLightAdjustedImage(path, adjust = {}, accuracy = 50) {
+    const baseImage = await loadAndColorAgjustImage(path, adjust);
+    const lightLayer = await loadAndColorAgjustImage(path, {brightness: 0});
+
+    const lightAccuracy = accuracy;
+
+    let imageCollection = [];
+
+    const oc = new OffscreenCanvas(baseImage.width, baseImage.height);
+    const octx = oc.getContext("2d", { willReadFrequently: true });
+
+    for (let i = 0; i < lightAccuracy; i++) {
+        const opacity = (i+1)/lightAccuracy;
+
+        octx.clearRect(0, 0, baseImage.width, baseImage.height);
+        octx.drawImage(baseImage, 0, 0);
+        octx.filter = `opacity(${opacity})`;
+        octx.drawImage(lightLayer, 0, 0);
+        octx.filter = 'none';
+
+        imageCollection.push(oc.transferToImageBitmap());
+    }
+
+    return imageCollection;
 }
 
 function imageDataToBitmap(imageData) {
@@ -672,3 +704,9 @@ function pointTowards(tx, ty, fx, fy) {
     }
     return (360 + Math.atan(deltaX / deltaY)*180/Math.PI) % 360;
 }
+
+let zipImagesAndDownload;
+(async () => {
+    zipImagesAndDownload = await import("./cImports/zip.js");
+    zipImagesAndDownload = zipImagesAndDownload.zipImagesAndDownload;
+})();

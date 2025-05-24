@@ -8,6 +8,9 @@ let spawnRate = 0;
 let maxSpawn = 0;
 let currentActiveEntities = 0;
 
+let entityItemAmount = 0;
+let maxEntityItems = 400;
+
 let naturalSpawnDisable = false;
 let entityI = 0;
 
@@ -377,6 +380,11 @@ function getSpawnrates() {
 }
 
 function drawEntities() {
+    const oc = new OffscreenCanvas(main.clientWidth, main.clientHeight);
+    const octx = oc.getContext("2d");
+
+    octx.imageSmoothingEnabled = false;
+
     for (let i = 0; i < entities.length; i++) {
         const entityObject = entities[i];
         if (!isEntityInViewspace(entityObject.motion, entityObject.image)) {continue;}
@@ -384,17 +392,17 @@ function drawEntities() {
         const image = entityObject.image;
         const MM = new moveMatrix(viewspaceWidth/2 + (motion.x - cam.x + (image.data?.offsetX ?? 0))*cam.zoom, viewspaceHeight/2 - (motion.y - cam.y + (image.data?.offsetY ?? 0))*cam.zoom, image.data.renderWidth*cam.zoom * ((image.data?.flipImageX ?? false)*-2 + 1), image.data.renderHeight*cam.zoom * ((image.data?.flipImageY ?? false)*-2 + 1));
         const RM = new rotationMatrix(motion.rotation, motion.centerX, motion.centerY);
-        const CM = new cropMatrix(0, (image.selectedImage*(image.data.imageSubHeight + image.data.padding))/image.bitmap.data.height, image.data.imageSubWidth/image.bitmap.data.width, image.data.imageSubHeight/image.bitmap.data.height);
-        drawAdvImage(ctx, image.bitmap.data, MM, RM, CM, true);
-
+        const CM = new cropMatrix(0, (image.selectedImage*(image.data.imageSubHeight + image.data.padding))/image.bitmap.base.height, image.data.imageSubWidth/image.bitmap.base.width, image.data.imageSubHeight/image.bitmap.base.height);
+        
         let light = getLight(getIDX(getGridPos(motion.x), getGridPos(motion.y)), {dayNight: dayNight});
-        light = 100 - Math.min(100, light/120*100);
-        if (light == 0 || xray) {continue;}
-
-        ctx.filter = `brightness(0%) opacity(${light}%)`;
-        drawAdvImage(ctx, image.bitmap.base, MM, RM, CM, true);
-        ctx.filter = 'none';
+        light = 1 - Math.min(1, light/120);
+        if (xray) {light = 0;}
+        light = Math.floor(light*(50-1));
+        drawAdvImage(octx, image.bitmap.data[light], MM, RM, CM, true);
     }
+
+    const entityFrame = oc.transferToImageBitmap();
+    ctx.drawImage(entityFrame, 0, 0);
 }
 
 function isEntityInViewspace(motion, image) {
@@ -418,9 +426,9 @@ async function loadEntityImages() {
         const colorAdjust = value?.colorAdjust ?? {};
         const path = imagePath + imageSheet;
         entityImages[key] = {};
-        entityImages[key].data = await loadAndColorAgjustImage(path, colorAdjust);
+        entityImages[key].data = await loadLightAdjustedImage(path, colorAdjust, 50);
         entityImages[key].base = await loadImage(path);
-        //downloadImagebitmap(entityImages[key].data, "testy.png")
+        //zipImagesAndDownload(entityImages[key].data, value.name);
     }
 }
 

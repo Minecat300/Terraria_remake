@@ -7,21 +7,30 @@ function mainTick(entityObject, entityNumber) {
 
     const itemId = data.itemId;
 
+    if (entityItemAmount > maxEntityItems && !(data?.firstRun ?? false)) {
+        deleteEntity(entityNumber);
+        entityItemAmount--;
+        return;
+    }
+
     if (data?.firstRun ?? false) {
         data.firstRun = false;
 
-        const src = itemImages[itemId]; 
+        entityItemAmount++; 
+
+        const srcBase = itemImages[itemId].base;
+        const srcData = itemImages[itemId].entityData;
 
         image.bitmap = { ...image.bitmap };
-        image.bitmap.data = src;
-        image.bitmap.base = src;
+        image.bitmap.data = srcData;
+        image.bitmap.base = srcBase;
 
         image.data = { ...image.data };   
-        image.data.renderWidth = src.width;
-        image.data.renderHeight = src.height;
-        image.data.imageSubWidth = src.width;
-        image.data.imageSubHeight = src.height;
-        image.data.offsetY = src.height / 2;
+        image.data.renderWidth = srcBase.width;
+        image.data.renderHeight = srcBase.height;
+        image.data.imageSubWidth = srcBase.width;
+        image.data.imageSubHeight = srcBase.height;
+        image.data.offsetY = srcBase.height / 2;
     }
 
     const dx = motion.x - player.pos.x;
@@ -39,6 +48,7 @@ function mainTick(entityObject, entityNumber) {
             });
             giveItem(new item(data.itemId, data?.itemAmount ?? 1), "inventory");
             deleteEntity(entityNumber);
+            entityItemAmount--;
             return;
         }
     } else {

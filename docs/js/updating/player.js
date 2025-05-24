@@ -349,7 +349,7 @@ function drawCharacter(
 }
 
 function drawHeldItem(x, y, item, handAnimation, scale, light, dir) {
-    const img = itemImages?.[item.id] ?? unknownImage;
+    const img = itemImages?.[item.id].base ?? unknownImage;
     const offsets = itemData[item.id]?.handAnimationOffset ?? {dir: 0, x: 0.5, y: 0.5};
 
     let tx = 0;

@@ -37,8 +37,8 @@ function drawClosedInventory() {
     }
     if (buildGuide.active) {
         if (selectedSlot.item().id == 0) {return;}
-        const tx = uiSize*10 + itemImages[selectedSlot.item().id].width*0.65*uiSize;
-        const ty = uiSize*10 + itemImages[selectedSlot.item().id].height*0.65*uiSize;
+        const tx = uiSize*10 + itemImages[selectedSlot.item().id].base.width*0.65*uiSize;
+        const ty = uiSize*10 + itemImages[selectedSlot.item().id].base.height*0.65*uiSize;
         drawItem(mouseX - tx, mouseY + ty, new item(selectedSlot.item().id, 1), 1);
     }
 }
@@ -86,7 +86,7 @@ function drawOpenInventory() {
 
 function drawItem(x, y, item, scale) {
     if (item.id == 0) {return;}
-    drawAdvImage(ctx, itemImages[item.id], new moveMatrix(x, y, uiSize*itemImages[item.id].width*1.3*scale, undefined));
+    drawAdvImage(ctx, itemImages[item.id].base, new moveMatrix(x, y, uiSize*itemImages[item.id].base.width*1.3*scale, undefined));
     if (item.amount <= 1) {return;}
     drawOnlyText(item.amount, x - uiSize*17*scale, y + uiSize*20*scale, scale*uiSize*(24 - Math.max(0, item.amount.toString().length-2)*2), "left", "white", "black");
 }
@@ -447,7 +447,9 @@ async function loadItemImages() {
     for (let id in itemData) {
         let item = itemData[id];
         if ((item?.image ?? 'none') == 'none') {continue;}
-        itemImages[id] = await loadImage('images/items/' + item.image);
+        itemImages[id] = {};
+        itemImages[id].base = await loadImage('images/items/' + item.image);
+        itemImages[id].entityData = await loadLightAdjustedImage('images/items/' + item.image);
     }
 }
 
