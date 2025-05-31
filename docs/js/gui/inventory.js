@@ -100,7 +100,7 @@ function slotTick(x, y, currentSlot) {
 
     if (dist > 31*uiSize) {return;}
     uiOveride = true;
-    if (!mouseDown || !m.m1) {return;}
+    if (!mouseDown || !m.m1 || fullscreenMap) {return;}
     if (cursorSlot.item().id == 0 && currentSlot.item().id == 0) {return;}
 
     m.m1 = false;
@@ -205,7 +205,7 @@ function drawCraftingUi() {
         const ty2 = i*56*uiSize+6;
         if (isMouseIn(tx-uiSize*26, tx+uiSize*26, ty+ty2-uiSize*26, ty+ty2+uiSize*26)) {
             uiOveride = true;
-            if (mouseDown && m.m1) {
+            if (mouseDown && m.m1 && !fullscreenMap) {
                 m.m1 = false;
                 selectedRecipe += i;
                 break;
@@ -217,7 +217,7 @@ function drawCraftingUi() {
         const ty2 = i*-56*uiSize-6;
         if (isMouseIn(tx-uiSize*26, tx+uiSize*26, ty+ty2-uiSize*26, ty+ty2+uiSize*26)) {
             uiOveride = true;
-            if (mouseDown && m.m1) {
+            if (mouseDown && m.m1 && !fullscreenMap) {
                 m.m1 = false;
                 selectedRecipe -= i;
                 break;
@@ -227,7 +227,7 @@ function drawCraftingUi() {
 
     if (isMouseIn(tx-uiSize*32.5, tx+uiSize*32.5, ty-uiSize*32.5, ty+uiSize*32.5)) {
         uiOveride = true;
-        if (mouseDown && (cursorSlot.item().id == 0 || (cursorSlot.item().id == getCurrentRecipeItem(selectedRecipe).id && cursorSlot.item().amount <= itemData[getCurrentRecipeItem(selectedRecipe).id].stack-getCurrentRecipeItem(selectedRecipe).amount))) {
+        if (!fullscreenMap && mouseDown && (cursorSlot.item().id == 0 || (cursorSlot.item().id == getCurrentRecipeItem(selectedRecipe).id && cursorSlot.item().amount <= itemData[getCurrentRecipeItem(selectedRecipe).id].stack-getCurrentRecipeItem(selectedRecipe).amount))) {
             if (craftingDelay.delay > craftingDelay.next) {
                 craftingDelay.next += Math.ceil(craftingDelay.speed);
                 craftingDelay.speed = craftingDelay.speed / 1.2;

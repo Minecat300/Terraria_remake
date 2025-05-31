@@ -1,5 +1,6 @@
 let skyLightGrid = new Uint8Array();
 let lightGrid = new Uint8Array();
+let mapLightGrid = new Uint8Array();
 
 let lucIdx;
 
@@ -27,13 +28,15 @@ this.onmessage = function (e) {
 
     skyLightGrid = new Uint8Array(_LworldSize);
     lightGrid = new Uint8Array(_LworldSize);
+    mapLightGrid = new Uint8Array(_LworldSize);
 
     (async () => {
         await generateSkyLight();
         self.postMessage({
             type: "world",
-            skyLightGrid: skyLightGrid,
-            lightGrid: lightGrid
+            skyLightGrid,
+            lightGrid,
+            mapLightGrid
         });
     })();
 }

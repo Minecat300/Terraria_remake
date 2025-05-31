@@ -24,7 +24,8 @@
         "item": 2,
         "breakType": 1,
         "hardness": 50,
-        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "856047"
     },
 
     "2": {
@@ -46,7 +47,8 @@
         "item": 3,
         "breakType": 1,
         "hardness": 100,
-        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "736d6a"
     },
 
     "3": {
@@ -68,7 +70,8 @@
         "item": 2,
         "breakType": 1,
         "hardness": "grass",
-        "sound": {"name": "Grass", "type": ".wav"}
+        "sound": {"name": "Grass", "type": ".wav"},
+        "mapColor": "4e8b44"
     },
 
     "4": {
@@ -90,7 +93,8 @@
         "item": 11,
         "breakType": 1,
         "hardness": 100,
-        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "837269"
     },
 
     "5": {
@@ -112,7 +116,8 @@
         "item": 12,
         "breakType": 1,
         "hardness": 100,
-        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "975e3b"
     },
 
     "6": {
@@ -128,7 +133,8 @@
         "item": 30,
         "breakType": 3,
         "hardness": 50,
-        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "5a3e30"
     },
 
     "7": {
@@ -145,7 +151,8 @@
         "item": 30,
         "breakType": 3,
         "hardness": 50,
-        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "583f32"
     },
 
     "8": {
@@ -167,7 +174,8 @@
         "underBreak": "no",
         "hardness": 500,
         "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
-        "tree": true
+        "tree": true,
+        "mapColor": "846148"
     },
 
     "9": {
@@ -190,7 +198,8 @@
         "hardness": 500,
         "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
         "tree": true,
-        "treeType": "sec"
+        "treeType": "sec",
+        "mapColor": "846148"
     },
 
     "10": {
@@ -244,7 +253,8 @@
         "item": 9,
         "breakType": 1,
         "hardness": 100,
-        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "886348"
     },
 
     "13": {
@@ -263,7 +273,8 @@
         "item": 36,
         "breakType": 1,
         "hardness": 100,
-        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "664b39"
     },
 
     "14": {
@@ -280,7 +291,8 @@
         "item": 93,
         "breakType": 3,
         "hardness": 100,
-        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "433024"
     },
 
     "15": {
@@ -301,7 +313,8 @@
         "item": 94,
         "breakType": 1,
         "hardness": 100,
-        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Dig_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "644a38"
     },
 
     "16": {
@@ -318,7 +331,8 @@
         "item": 26,
         "breakType": 3,
         "hardness": 100,
-        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "313131"
     },
 
     "17": {
@@ -337,7 +351,8 @@
         "item": 29,
         "breakType": 1,
         "hardness": 0,
-        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "8e4157"
     },
 
     "18": {
@@ -357,6 +372,7 @@
         "item": 33,
         "breakType": 1,
         "hardness": 100,
-        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}}
+        "sound": {"name": "Tink_", "type": ".wav", "amount": {"start": 0, "end": 2}},
+        "mapColor": "615953"
     }
 }

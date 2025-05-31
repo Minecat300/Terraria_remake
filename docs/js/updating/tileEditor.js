@@ -72,7 +72,7 @@ function editTiles() {
         buildDelay--;
     }
 
-    if (!mouseDown) {return;}
+    if (!mouseDown || fullscreenMap) {return;}
 
     if (player.handAnimation < 0) {
         player.handAnimation = 0;
@@ -297,7 +297,7 @@ function creativeEditTiles() {
     if (keyPress.c) {
         brush = tile;
     }
-    if (mouseDown) {
+    if (mouseDown && !fullscreenMap) {
         if (tileGrid[index] == brush && !(tileData[brush]?.wall ?? false)) {return;}
         if (wallGrid[index] == brush && (tileData[brush]?.wall ?? false)) {return;}
         adaptivePlaceTile(brush, index, tileData[brush]?.wall ?? false);

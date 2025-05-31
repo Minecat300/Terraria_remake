@@ -128,6 +128,16 @@ function updateKeyboard(event, state) {
                 beeps = !beeps;
             }
             break;
+        case "m":
+            if (state) {
+                fullscreenMap = !fullscreenMap;
+                if (fullscreenMap) {
+                    mapPos.x = cam.x;
+                    mapPos.y = cam.y;
+                    mapPos.zoom = 1;
+                }
+            }
+            break;
         case "o":
             if (state) {
                 creative = !creative;
@@ -198,6 +208,15 @@ window.addEventListener("wheel", function(event){wheelScroll(event.deltaY)});
 
 function wheelScroll(dir) {
     dir /= Math.abs(dir);
+    if (fullscreenMap) {
+        if (dir == 1) {
+            mapPos.zoom *= 1.2;
+        }
+        if (dir == -1) {
+            mapPos.zoom *= 0.8;
+        }
+        return;
+    }
     if (!inventoryOpen) {
         if (dir == 1) {
             if (selectedHotbar == 9) {
@@ -444,21 +463,12 @@ function unpackSignedXY(value) {
 }
 
 function randomNumber(min, max, decimal = false) {
-    if (min == max) {
-        return min;
-    }
-    if (min > max) {
-        const tmp = max;
-        max = min;
-        min = tmp;
-    }
-    if(decimal) {
-        return Math.min((Math.random()*(max-min+1))+min, max);
-    } else {
-        min = Math.floor(min);
-        max = Math.floor(max);
-        return Math.min(Math.floor(Math.random()*(max-min+1))+min, max);
-    }
+  if (min > max) [min, max] = [max, min];
+
+  if (!decimal) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  return Math.random() * (max - min) + min;
 }
 
 async function loadJSON(path) {
@@ -592,6 +602,20 @@ function grayscaleToRedscale(imageData) {
 
     return imageData;
 }
+
+function hexToRgb(hex) {
+  hex = hex.replace(/^#/, "");
+  if (hex.length === 3) {
+    hex = hex.split("").map(c => c + c).join("");
+  }
+  const num = parseInt(hex, 16);
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255
+  };
+}
+
 
 function sin(r) {
     return Math.sin(r*Math.PI/180);

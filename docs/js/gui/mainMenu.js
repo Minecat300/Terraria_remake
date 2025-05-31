@@ -165,8 +165,8 @@ async function setupWorld() {
     console.log(entityData);
 
     worldGenWorker.postMessage({
-        tileData: tileData,
-        tileSolverData: tileSolverData
+        tileData,
+        tileSolverData
     });
 }
 
@@ -191,10 +191,10 @@ worldGenWorker.onmessage = (e) => {
         genData.currentMain++;
 
         lightEngineWorker.postMessage({
-            tileData: tileData,
-            tileGrid: tileGrid,
-            wallGrid: wallGrid,
-            genData: genData,
+            tileData,
+            tileGrid,
+            wallGrid,
+            genData,
             worldSize: {width: worldWidth, height: worldHeight}
         });
 
@@ -210,6 +210,7 @@ lightEngineWorker.onmessage = (e) => {
     if (data.type == "world") {
         skyLightGrid = new Uint8Array(data.skyLightGrid);
         lightGrid = new Uint8Array(data.lightGrid);
+        mapLightGrid = new Uint8Array(data.mapLightGrid)
 
         lightEngineWorker.terminate();
 

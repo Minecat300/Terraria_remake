@@ -294,6 +294,34 @@ function getLight(idx, settings) {
     return  Math.floor(Math.max(skyLightGrid[idx] * settings.dayNight, lightGrid[idx]));
 }
 
+function insertLightForMap(light, skyLight, viewWidth, viewHeight, gridX, gridY) {
+    for (let y = 0; y < viewHeight; y++) {
+        for (let x = 0; x < viewWidth; x++) {
+            const i = y * viewWidth + x;
+            const val = Math.max(light[i] & 0xFF, Math.round(skyLight[i]*dayNight) & 0xFF);
+
+            const gridIndex = getIDX(gridX + x, gridY + y);
+
+            if (val > mapLightGrid[gridIndex]) {
+                mapLightGrid[gridIndex] = val;
+            }
+        }
+    }
+}
+
+function updateMapLight() {
+    const viewspaceGridWidth = Math.ceil(viewspaceWidth/(tilesheetSize*cam.zoom))+2;
+    const viewspaceGridHeight = Math.ceil(viewspaceHeight/(tilesheetSize*cam.zoom))+2;
+
+    const viewspaceGridX = getGridPos(player.pos.x) - Math.floor(viewspaceGridWidth/2);
+    const viewspaceGridY = getGridPos(player.pos.y) - Math.floor(viewspaceGridHeight/2);
+
+    const light = extractViewspace(lightGrid, viewspaceGridX, viewspaceGridY, viewspaceGridWidth, viewspaceGridHeight, false);
+    const skyLight = extractViewspace(skyLightGrid, viewspaceGridX, viewspaceGridY, viewspaceGridWidth, viewspaceGridHeight, false);
+
+    insertLightForMap(light, skyLight, viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY);
+}
+
 function drawSingleLayer(viewspaceGridWidth, viewspaceGridHeight, viewspaceGridX, viewspaceGridY, bitmap, padding, tileSize, forground = false, light = false) {
 
     const layerCanvas = new OffscreenCanvas(viewspaceGridWidth*chunkSize.width*8, viewspaceGridHeight*chunkSize.height*8);
@@ -400,6 +428,8 @@ function drawTileFrame() {
             delete wallBitmap[key];
         }
     }
+
+    updateMapLight();
 
     if (Math.floor(cam.x/tilesheetSize/chunkSize.width*2) != prevCam.x || Math.floor(cam.y/tilesheetSize/chunkSize.height*2) != prevCam.y || cam.zoom != prevCam.zoom) {
         prevCam.x = Math.floor(cam.x/tilesheetSize/chunkSize.width*2);
@@ -592,6 +622,8 @@ async function startGame() {
     await loadMultiblockPreview();
     await loadAnimatedTiles();
 
+    await loadMapImages();
+
     await loadEntityAssets();
 
     await loadPlayerAssets();
@@ -630,20 +662,25 @@ async function startGame() {
 function renderMain() {
     updateAsp(lockAsp);
     ctx.clearRect(0, 0, c.width, c.height);
-    drawSkyBackground();
-    ctx.imageSmoothingEnabled = false;
-    drawTileFrame();
-    drawPlayer();
-    drawEntities();
-    drawBuildOverlay();
-    drawInventory();
+    if (fullscreenMap) {
+        ctx.imageSmoothingEnabled = false;
+        drawFullscreenMap();
+    } else {
+        drawSkyBackground();
+        ctx.imageSmoothingEnabled = false;
+        drawTileFrame();
+        drawPlayer();
+        drawEntities();
+        drawBuildOverlay();
+        drawInventory();
+        drawMinimap();
+    }
     drawDebugOverlay();
     drawAsp();
 }
 
 function drawDebugOverlay() {
-    drawOnlyText("FPS: " + FPS, viewspaceWidth - 5, viewspaceHeight - 40, 30, "right", "white", "black")
-    drawOnlyText("UPS: " + UPS, viewspaceWidth - 5, viewspaceHeight - 5, 30, "right", "white", "black")
+    drawOnlyText("FPS: " + FPS, viewspaceWidth - 5, viewspaceHeight - 5, 30, "right", "white", "black");
 }
 
 tileWorker.onmessage = (e) => {
