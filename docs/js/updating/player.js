@@ -14,7 +14,9 @@ const player = {
     dir: 1,
     frame: 0,
     handAnimation: -1,
-    solid: 0
+    solid: 0,
+    health: 100,
+    maxHealth: 100,
 }
 
 let buildAni = {delay: 0, maxDelay: 0, item: {id: 0, amount: 0}};

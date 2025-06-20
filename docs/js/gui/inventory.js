@@ -376,6 +376,12 @@ function giveToExistingItem(amount, tItem, container) {
     return amount;
 }
 
+function drawPlayerHealthUi() {
+    for (let x = 0; x < Math.min(10, Math.floor(player.maxHealth/20)); x++) {
+        drawAdvImage(ctx, );
+    }
+}
+
 function updateSelectedSlot() {
     if (!selectedSlot.compare(oldSelectedSlot)) {
         oldSelectedSlot = selectedSlot.copy();
@@ -453,12 +459,31 @@ async function loadItemImages() {
     }
 }
 
+async function loadStatGuiImages() {
+    statImages.fancyClassic = {};
+    const fancyClassic = statImages.fancyClassic;
+
+    fancyClassic.heartFillB = await loadImage('images/gui/stats/FancyClassic/Heart_Fill_B.png');
+    fancyClassic.heartFill = await loadImage('images/gui/stats/FancyClassic/Heart_Fill.png');
+    fancyClassic.heartLeft = await loadImage('images/gui/stats/FancyClassic/Heart_Left.png');
+    fancyClassic.heartMiddle = await loadImage('images/gui/stats/FancyClassic/Heart_Middle.png');
+    fancyClassic.heartRightFancy = await loadImage('images/gui/stats/FancyClassic/Heart_Right_Fancy.png');
+    fancyClassic.heartRight = await loadImage('images/gui/stats/FancyClassic/Heart_Right.png');
+    fancyClassic.heartSingleFancy = await loadImage('images/gui/stats/FancyClassic/Heart_Single_Fancy.png');
+    fancyClassic.starA = await loadImage('images/gui/stats/FancyClassic/Star_A.png');
+    fancyClassic.starB = await loadImage('images/gui/stats/FancyClassic/Star_B.png');
+    fancyClassic.starC = await loadImage('images/gui/stats/FancyClassic/Star_C.png');
+    fancyClassic.starFill = await loadImage('images/gui/stats/FancyClassic/Star_Fill.png');
+    fancyClassic.starSingle = await loadImage('images/gui/stats/FancyClassic/Star_Single.png');
+}
+
 let inventoryOpen = false;
 
 let uiSize = 0.9;
 
 let inventoryGuiImages = {};
 let itemImages = {};
+let statImages = {};
 
 let itemData = {};
 
@@ -467,6 +492,8 @@ let uiOveride = false;
 let itemRecipesData;
 let currentStations = [];
 let currentCraftableRecipes = [];
+
+let healthUiType = 1;
 
 let craftingDelay = {
     delay: 0,

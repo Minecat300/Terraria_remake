@@ -11,7 +11,7 @@ let mapPos = {
     prevY: 0
 };
 
-let minimap = true;
+let minimap = false;
 let minimapZoom = 6;
 let minimapResolution = 70;
 

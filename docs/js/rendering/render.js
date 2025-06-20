@@ -642,7 +642,8 @@ async function startGame() {
     unknownImage = await loadImage("images/unknown.png");
 
     await loadItemImages();
-    loadSmartCursor();
+    await loadSmartCursor();
+    await loadStatGuiImages();
 
     createImageBitmap(tilesImg.img).then((imageBitmap) => {
         tileWorker.postMessage({ tilesheet: imageBitmap, tileData: tileData, tilesheetData: tilesImg.data }, [imageBitmap]);
@@ -672,6 +673,7 @@ function renderMain() {
         drawPlayer();
         drawEntities();
         drawBuildOverlay();
+        drawPlayerHealthUi();
         drawInventory();
         drawMinimap();
     }
